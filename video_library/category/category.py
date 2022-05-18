@@ -1,13 +1,13 @@
 from datetime import datetime
 from dataclasses import dataclass, field
 from typing import Optional
-import uuid
+
+from __seedwork.entities import GenericEntity
 
 
-@dataclass(kw_only=True)
-class Category:
+@dataclass(kw_only=True, frozen=True, slots=True)
+class Category(GenericEntity):
 
-    id_: uuid.UUID = field(default_factory=lambda: uuid.uuid4())
     name: str
     description: Optional[str] = None
     is_active: Optional[bool] = True

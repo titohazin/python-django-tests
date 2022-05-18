@@ -1,4 +1,4 @@
-from dataclasses import is_dataclass
+from dataclasses import FrozenInstanceError, is_dataclass
 from datetime import datetime
 from category.category import Category
 import unittest
@@ -44,4 +44,10 @@ class CategoryUnitTest(unittest.TestCase):
         category_1 = Category(name='cat1')
         category_2 = Category(name='cat2')
         # Assert:
-        self.assertNotEquals(category_1.created_at, category_2.created_at)
+        self.assertNotEqual(category_1.created_at, category_2.created_at)
+
+    def test_if_is_immutable(self):
+        # Arrange/Act/Assert:
+        with self.assertRaises(FrozenInstanceError):
+            unique_id_entity = Category(name='movie_name')
+            unique_id_entity.name = 'other_name'
