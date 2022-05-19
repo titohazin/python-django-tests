@@ -8,12 +8,12 @@ from __seedwork.value_objects import GenericValueObject, UniqueEntityId
 from __seedwork.exceptions import InvalidUuidException
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class VOStubOneProperty(GenericValueObject):
     prop: str = 'value'
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class VOStubTwoProperties(GenericValueObject):
     prop: str = 'value'
     prop_: str = 'other value'

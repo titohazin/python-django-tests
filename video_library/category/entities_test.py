@@ -1,6 +1,6 @@
 from dataclasses import FrozenInstanceError, is_dataclass
 from datetime import datetime
-from category.category import Category
+from category.entities import Category
 import unittest
 
 
@@ -51,3 +51,20 @@ class CategoryUnitTest(unittest.TestCase):
         with self.assertRaises(FrozenInstanceError):
             unique_id_entity = Category(name='movie_name')
             unique_id_entity.name = 'other_name'
+
+    def test_update_method(self):
+        # Arrange:
+        name_test = 'name'
+        description_test = 'description'
+        datetime_test = datetime.now()
+        category = Category(
+            name='initial name',
+            created_at=datetime_test,
+            updated_at=datetime_test)
+        # Act:
+        category.update(name=name_test, description=description_test)
+        # Assert:
+        self.assertEqual(category.name, name_test)
+        self.assertEqual(category.description, description_test)
+        self.assertEqual(category.created_at, datetime_test)
+        self.assertNotEqual(category.updated_at, datetime_test)

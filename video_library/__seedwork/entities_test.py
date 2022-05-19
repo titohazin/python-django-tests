@@ -1,5 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass, is_dataclass
+from datetime import datetime
 import unittest
 import uuid
 
@@ -7,9 +8,10 @@ from __seedwork.entities import GenericEntity
 from __seedwork.value_objects import UniqueEntityId
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, slots=True)
 class GenericEntityStub(GenericEntity):
     prop: str = 'value'
+    prop_: str = 'value_'
 
 
 class GenericEntityUnitTest(unittest.TestCase):
@@ -30,7 +32,7 @@ class GenericEntityUnitTest(unittest.TestCase):
 
     def test_init_properties_and_unique_entity_id(self):
         # Arrange:
-        prop_test = 'value'
+        prop_test = 'any value'
         # Act:
         entity = GenericEntityStub(prop=prop_test)
         # Assert:
@@ -47,24 +49,53 @@ class GenericEntityUnitTest(unittest.TestCase):
         self.assertEqual(entity.id, str(uuid_test))
 
     def test_to_dict_method(self):
-        # Arrange:
-        uuid_test = uuid.uuid4()
-        prop_test = 'value'
-        # Act:
-        entity = GenericEntityStub(unique_entity_id=uuid_test, prop=prop_test)
+        # Arrange/Act:
+        entity = GenericEntityStub()
         # Assert:
         self.assertDictEqual(entity.to_dict(), {
-            'id': str(uuid_test),
-            'prop': prop_test
+            'id': entity.id,
+            'prop': entity.prop,
+            'prop_': entity.prop_,
+            'is_active': entity.is_active,
+            'updated_at': entity.updated_at,
+            'created_at': entity.created_at
         })
 
-    # def test_convert_to_string(self):
-        #     # Arrange/Act:
-    #     value_object_1 = TestStubOneProperty()
-    #     value_object_2 = TestStubTwoProperty()
-    #     # Assert:
-    #     self.assertEqual(str(value_object_1), value_object_1.prop)
-    #     self.assertEqual(
-    #         str(value_object_2),
-    #         '{"prop": "prop value", "prop_": "other prop value"}'
-    #     )
+    def test_deactivate_method(self):
+        # Arrange:
+        entity = GenericEntity()
+        # Act:
+        entity.deactivate()
+        # Assert:
+        self.assertFalse(entity.is_active)
+
+    def test_activate_method(self):
+        # Arrange:
+        entity = GenericEntity(is_active=False)
+        # Act:
+        entity.activate()
+        # Assert:
+        self.assertTrue(entity.is_active)
+
+    def test_set_attr_method(self):
+        # Arrange:
+        prop_test = 'any value'
+        initial_datetime = datetime.now()
+        entity_stub = GenericEntityStub(updated_at=initial_datetime)
+        # Act:
+        entity_stub._set_attr('prop', prop_test)
+        # Assert:
+        self.assertEqual(entity_stub.prop, prop_test)
+        self.assertNotEqual(entity_stub.updated_at, initial_datetime)
+
+    def test_set_attrs_dict_method(self):
+        # Arrange:
+        prop_test = 'any value'
+        initial_datetime = datetime.now()
+        entity_stub = GenericEntityStub(updated_at=initial_datetime)
+        # Act:
+        entity_stub._set_attrs_dict({'prop': prop_test, 'prop_': prop_test})
+        # Assert:
+        self.assertEqual(entity_stub.prop, prop_test)
+        self.assertEqual(entity_stub.prop_, prop_test)
+        self.assertNotEqual(entity_stub.updated_at, initial_datetime)

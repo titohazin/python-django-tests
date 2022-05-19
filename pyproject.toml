@@ -9,8 +9,7 @@ dependencies = [
     "django==3.2.13",
     "autopep8>=1.6.0",
     "flake8>=4.0.1",
-    "djangorestframework>=3.13.1",
-]
+    "djangorestframework>=3.13.1"]
 requires-python = ">=3.10.4"
 license = {text = "MIT"}
 [project.optional-dependencies]

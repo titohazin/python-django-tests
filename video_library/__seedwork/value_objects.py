@@ -6,7 +6,7 @@ import uuid
 from __seedwork.exceptions import InvalidUuidException
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class GenericValueObject(ABC):
 
     def __str__(self) -> str:
@@ -22,7 +22,7 @@ class GenericValueObject(ABC):
             })
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class UniqueEntityId(GenericValueObject):
 
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
