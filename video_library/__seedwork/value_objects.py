@@ -3,7 +3,7 @@ from dataclasses import dataclass, field, fields
 import json
 import uuid
 
-from __seedwork.exceptions import InvalidUuidException
+from .exceptions import InvalidUuidException
 
 
 @dataclass(frozen=True, slots=True)

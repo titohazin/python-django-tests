@@ -4,8 +4,8 @@ from unittest.mock import patch
 import uuid
 import unittest
 
-from __seedwork.value_objects import GenericValueObject, UniqueEntityId
-from __seedwork.exceptions import InvalidUuidException
+from .value_objects import GenericValueObject, UniqueEntityId
+from .exceptions import InvalidUuidException
 
 
 @dataclass(frozen=True, slots=True)
@@ -19,7 +19,7 @@ class VOStubTwoProperties(GenericValueObject):
     prop_: str = 'other value'
 
 
-class GenericValueObjectUnitTest(unittest.TestCase):
+class GenericValueObjectUnitTests(unittest.TestCase):
 
     def test_if_is_a_data_class(self):
         # Arrange:
@@ -65,7 +65,7 @@ class GenericValueObjectUnitTest(unittest.TestCase):
         )
 
 
-class UniqueEntityIdUnitTest(unittest.TestCase):
+class UniqueEntityIdUnitTests(unittest.TestCase):
 
     def test_if_is_a_data_class(self):
         # Arrange:

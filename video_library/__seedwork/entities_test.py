@@ -4,8 +4,8 @@ from datetime import datetime
 import unittest
 import uuid
 
-from __seedwork.entities import GenericEntity
-from __seedwork.value_objects import UniqueEntityId
+from .entities import GenericEntity
+from .value_objects import UniqueEntityId
 
 
 @dataclass(frozen=True, slots=True)
@@ -14,7 +14,7 @@ class GenericEntityStub(GenericEntity):
     prop_: str = 'value_'
 
 
-class GenericEntityUnitTest(unittest.TestCase):
+class GenericEntityUnitTests(unittest.TestCase):
 
     def test_if_is_a_data_class(self):
         # Arrange:

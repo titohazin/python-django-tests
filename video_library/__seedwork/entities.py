@@ -3,7 +3,7 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from typing import Optional
 
-from __seedwork.value_objects import UniqueEntityId
+from .value_objects import UniqueEntityId
 
 
 @dataclass(frozen=True, slots=True)
