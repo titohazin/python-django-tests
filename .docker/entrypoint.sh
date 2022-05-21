@@ -3,8 +3,6 @@
 # PDM initialization
 pdm install
 eval "$(pdm --pep582)"
-echo 'export PATH=$PATH:/home/python/app/__pypackages__/3.10/bin' >> ~/.zshrc
-echo 'export PATH=$PATH:/home/python/app/__pypackages__/3.10/bin' >> ~/.bashrc
 
 # Alias creation
 echo 'alias manage="python manage.py"' >> ~/.zshrc

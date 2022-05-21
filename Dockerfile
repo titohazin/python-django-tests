@@ -8,7 +8,7 @@ RUN apt install -y --no-install-recommends default-jre
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
 # Python Package Manager
-RUN pip install pdm
+RUN pip install pdm>=1.15.0
 
 # Add non-root user
 RUN useradd -ms /bin/bash python
@@ -33,8 +33,7 @@ RUN echo '[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh' >> ~/.zshrc
 RUN echo 'HISTFILE=/home/python/zsh/.zsh_history' >> ~/.zshrc
 
 # PDM (Python Package Manager) configs
-ENV MY_PYTHON_PACKAGES=/home/python/app/__pypackages__/3.10
-RUN export PATH=$PATH:${MY_PYTHON_PACKAGES}/bin
+ENV PATH="/home/python/app/__pypackages__/3.10/bin:${PATH}"
 RUN echo 'eval "$(pdm --pep582)"' >> ~/.bashrc
 RUN echo 'eval "$(pdm --pep582)"' >> ~/.zshrc
 

@@ -46,7 +46,8 @@
 		"python.testing.unittestEnabled": false,
 		// "python.testing.unittestArgs": ["-v", "-s", ".", "-p", "*_test.py"],
 		"python.testing.pytestEnabled": true,
-		"python.testing.pytestArgs": [".", "--ignore", "__pypackages__"]
+		// -s parameter enable print in Python Test Log
+		"python.testing.pytestArgs": [".", "-s", "--ignore", "__pypackages__"]
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.

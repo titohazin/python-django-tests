@@ -1,7 +1,9 @@
+from dataclasses import fields
 import unittest
 
 
 from .validators import Validator
+from .validators import ValidatorFieldsInterface
 from .exceptions import ValidationException
 
 
@@ -21,7 +23,7 @@ class ValidatorsUnitTests(unittest.TestCase):
     def test_required_rule(self):
         # Arrange:
         valid_data = [
-            {'value': 'any value', 'prop': 'prop'},
+            {'value': 'any value', 'prop': 'prop'},  # NOSONAR
             {'value': 5, 'prop': 'prop'},
             {'value': 0, 'prop': 'prop'},
             {'value': False, 'prop': 'prop'}
@@ -35,7 +37,7 @@ class ValidatorsUnitTests(unittest.TestCase):
         # Arrange:
         invalid_data = [
             {'value': None, 'prop': 'prop'},
-            {'value': '', 'prop': 'other prop'}
+            {'value': '', 'prop': 'other prop'}  # NOSONAR
         ]
         # Act/Assert:
         for data in invalid_data:
@@ -157,7 +159,7 @@ class ValidatorsUnitTests(unittest.TestCase):
             self.assertEqual(f'{data["prop"]} must be a boolean',
                              assert_error.exception.args[0])
 
-    def test_valid_values_when_combinate_rules(self):
+    def test_valid_values_when_combine_rules(self):
         # Arrange/Act/Assert:
         self.assertIsInstance(Validator.rules(
             'value', 'prop').required().string(), Validator)
@@ -174,7 +176,7 @@ class ValidatorsUnitTests(unittest.TestCase):
         self.assertIsInstance(Validator.rules(
             True, 'prop').required().boolean(), Validator)
 
-    def test_throw_exception_when_combinate_rules_case_1(self):
+    def test_throw_exception_when_combine_rules_case_1(self):
         # Arrange/Act/Assert:
         with self.assertRaises(ValidationException) as assert_error:
             Validator.rules(None, 'prop').required(
@@ -189,7 +191,7 @@ class ValidatorsUnitTests(unittest.TestCase):
         error_msg = assert_error.exception.args[0]
         self.assertEqual('prop must be a string', error_msg)
 
-    def test_throw_exception_when_combinate_rules_case_2(self):
+    def test_throw_exception_when_combine_rules_case_2(self):
         # Arrange/Act/Assert:
         with self.assertRaises(ValidationException) as assert_error:
             Validator.rules('hi', 'prop').required(
@@ -206,7 +208,7 @@ class ValidatorsUnitTests(unittest.TestCase):
         self.assertEqual(
             'prop must be equal or less than 5 characters', error_msg)
 
-    def test_throw_exception_when_combinate_rules_case_3(self):
+    def test_throw_exception_when_combine_rules_case_3(self):
         # Arrange/Act/Assert:
         with self.assertRaises(ValidationException) as assert_error:
             Validator.rules(None, 'prop').required().boolean()
@@ -218,3 +220,24 @@ class ValidatorsUnitTests(unittest.TestCase):
             Validator.rules('any value', 'prop').required().boolean()
         error_msg = assert_error.exception.args[0]
         self.assertEqual('prop must be a boolean', error_msg)
+
+
+class ValidatorFieldsInterfaceTest(unittest.TestCase):
+
+    def test_if_validate_method_is_abstract(self):
+        with self.assertRaises(TypeError) as assert_error:
+            ValidatorFieldsInterface()._validate()
+        self.assertEqual(assert_error.exception.args[0], "Can't instantiate " +
+                         "abstract class ValidatorFieldsInterface with abstract method _validate")
+
+    def test_if_errors_field_meets_specifications(self):
+        class_fields = fields(ValidatorFieldsInterface)
+        fields_errs_field = class_fields[0]
+        self.assertEqual(fields_errs_field.name, 'fields_errs')
+        self.assertIsNone(fields_errs_field.default)
+
+    def test_if_data_field_meets_specifications(self):
+        class_fields = fields(ValidatorFieldsInterface)
+        validated_data_field = class_fields[1]
+        self.assertEqual(validated_data_field.name, 'validated_data')
+        self.assertIsNone(validated_data_field.default)
