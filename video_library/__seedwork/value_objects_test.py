@@ -9,12 +9,12 @@ from .exceptions import InvalidUuidException
 
 
 @dataclass(frozen=True, slots=True)
-class VOStubOneProperty(GenericValueObject):
+class VOOnePropertyStub(GenericValueObject):
     prop: str = 'value'
 
 
 @dataclass(frozen=True, slots=True)
-class VOStubTwoProperties(GenericValueObject):
+class VOTwoPropertiesStub(GenericValueObject):
     prop: str = 'value'
     prop_: str = 'other value'
 
@@ -40,8 +40,8 @@ class GenericValueObjectUnitTests(unittest.TestCase):
         prop = 'new value'
         prop_ = 'new other value'
         # Act:
-        value_object_1 = VOStubOneProperty(prop=prop)
-        value_object_2 = VOStubTwoProperties(prop=prop, prop_=prop_)
+        value_object_1 = VOOnePropertyStub(prop=prop)
+        value_object_2 = VOTwoPropertiesStub(prop=prop, prop_=prop_)
         # Assert:
         self.assertEqual(value_object_1.prop, prop)
         self.assertEqual(value_object_2.prop, prop)
@@ -50,13 +50,13 @@ class GenericValueObjectUnitTests(unittest.TestCase):
     def test_if_is_immutable(self):
         # Arrange/Act/Assert:
         with self.assertRaises(FrozenInstanceError):
-            value_object_1 = VOStubOneProperty()
+            value_object_1 = VOOnePropertyStub()
             value_object_1.prop = 'new value'
 
     def test_convert_to_string(self):
         # Arrange/Act:
-        value_object_1 = VOStubOneProperty()
-        value_object_2 = VOStubTwoProperties()
+        value_object_1 = VOOnePropertyStub()
+        value_object_2 = VOTwoPropertiesStub()
         # Assert:
         self.assertEqual(str(value_object_1), value_object_1.prop)
         self.assertEqual(

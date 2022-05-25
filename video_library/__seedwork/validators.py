@@ -3,45 +3,9 @@ import abc
 from dataclasses import dataclass
 from typing import Any, Dict, Generic, List, TypeVar
 
-from .exceptions import ValidationException
-
-
-@dataclass(frozen=True, slots=True)
-class Validator:
-
-    value: Any
-    prop: str
-
-    @staticmethod
-    def rules(value: Any, prop: str):
-        return Validator(value, prop)
-
-    def required(self) -> 'Validator':
-        if self.value is None or self.value == '':
-            raise ValidationException(f'{self.prop} is required')
-        return self
-
-    def string(self) -> 'Validator':
-        if self.value is not None and not isinstance(self.value, str):
-            raise ValidationException(f'{self.prop} must be a string')
-        return self
-
-    def min_length(self, min: int) -> 'Validator':
-        if self.value is not None and len(self.value) < min:
-            raise ValidationException(
-                f'{self.prop} must be equal or greater than {min} characters')
-        return self
-
-    def max_length(self, max: int) -> 'Validator':
-        if self.value is not None and len(self.value) > max:
-            raise ValidationException(
-                f'{self.prop} must be equal or less than {max} characters')
-        return self
-
-    def boolean(self) -> 'Validator':
-        if self.value is not None and self.value is not True and self.value is not False:
-            raise ValidationException(f'{self.prop} must be a boolean')
-        return self
+from rest_framework.serializers import Serializer
+from rest_framework.serializers import CharField
+from rest_framework.serializers import BooleanField
 
 
 FieldsErrs = Dict[str, List[str]]
@@ -49,10 +13,41 @@ T = TypeVar('T')
 
 
 @dataclass(slots=True)
-class ValidatorFieldsInterface(ABC, Generic[T]):
+class FieldsValidatorInterface(ABC, Generic[T]):
 
     fields_errs: FieldsErrs = None
     validated_data: T = None
 
     @abc.abstractmethod
-    def _validate(self, data: Any) -> bool: ...
+    def validate(self, data: Any) -> bool: ...
+
+
+class DRFFieldsValidator(FieldsValidatorInterface[T], ABC):
+
+    def validate(self, serializer: Serializer) -> bool:
+        if serializer.is_valid():
+            self.validated_data = dict(serializer.validated_data)
+            return True
+        else:
+            self.fields_errs = {
+                field: [str(error) for error in errors]
+                for field, errors in serializer.errors.items()
+            }
+            return False
+
+
+class DRFStrictCharField(CharField):
+
+    def to_internal_value(self, data):
+        if not isinstance(data, str) and data is not None:
+            self.fail('invalid')
+        return super().to_internal_value(data)
+
+
+class DRFStrictBooleanField(BooleanField):
+
+    def to_internal_value(self, data):
+        if data is not None:
+            return data if isinstance(data, bool) \
+                else self.fail('invalid', input=data)
+        return super().to_internal_value(data)

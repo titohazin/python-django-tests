@@ -32,7 +32,7 @@ class GenericEntityUnitTests(unittest.TestCase):
 
     def test_init_properties_and_unique_entity_id(self):
         # Arrange:
-        prop_test = 'any value'
+        prop_test = 'any value'  # NOSONAR
         # Act:
         entity = GenericEntityStub(prop=prop_test)
         # Assert:

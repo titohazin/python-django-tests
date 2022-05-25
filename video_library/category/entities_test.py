@@ -23,7 +23,8 @@ class CategoryUnitTests(unittest.TestCase):
                 'name': 'movie_name',
                 'description': 'desc',
                 'is_active': True,
-                'created_at': datetime.now()
+                'created_at': None,
+                'updated_at': None
             }
             # Act:
             category = Category(**data)
@@ -31,7 +32,8 @@ class CategoryUnitTests(unittest.TestCase):
             self.assertEqual(category.name, data['name'])
             self.assertEqual(category.description, data['description'])
             self.assertEqual(category.is_active, data['is_active'])
-            self.assertEqual(category.created_at, data['created_at'])
+            self.assertIsInstance(category.created_at, datetime)
+            self.assertEqual(category.updated_at, data['updated_at'])
             mock_validate_method.assert_called_once()
 
     def test_constructor_default_values(self):
@@ -43,6 +45,7 @@ class CategoryUnitTests(unittest.TestCase):
             self.assertEqual(category.description, None)
             self.assertEqual(category.is_active, True)
             self.assertIsInstance(category.created_at, datetime)
+            self.assertEqual(category.updated_at, None)
 
     def test_if_created_at_is_generated_correctly(self):
         with patch.object(Category, '_Category__validate'):
@@ -76,6 +79,7 @@ class CategoryUnitTests(unittest.TestCase):
             self.assertEqual(category.description, description_test)
             self.assertEqual(category.created_at, datetime_test)
             self.assertNotEqual(category.updated_at, datetime_test)
+            self.assertIsInstance(category.updated_at, datetime)
             self.assertEqual(mock_validate_method.call_count, 2)
 
 
@@ -144,15 +148,15 @@ class CategoryIntegrationTests(unittest.TestCase):
         category = Category(name='foobar')
         # Act/Assert:
         with self.assertRaises(Exception):
-            category.update(None)
+            category.update(None)  # NOSONAR
         with self.assertRaises(Exception):
             category.update('')
         with self.assertRaises(Exception):
-            category.update(5)
+            category.update(5)  # NOSONAR
         with self.assertRaises(Exception):
-            category.update(True)
+            category.update(True)  # NOSONAR
         with self.assertRaises(Exception):
-            category.update({})
+            category.update({})  # NOSONAR
         with self.assertRaises(Exception):
             category.update('f' * 2)
         with self.assertRaises(Exception):
@@ -163,7 +167,7 @@ class CategoryIntegrationTests(unittest.TestCase):
         category = Category(name='foobar')
         # Act/Assert:
         try:
-            category.update(category.name, None)
+            category.update(category.name, None)  # NOSONAR
             category.update(category.name, '')
             category.update(category.name, 'foobar')
             category.update(category.name, 'f' * 255)
@@ -175,10 +179,10 @@ class CategoryIntegrationTests(unittest.TestCase):
         category = Category(name='foobar')
         # Act/Assert:
         with self.assertRaises(Exception):
-            category.update(category.name, 5)
+            category.update(category.name, 5)  # NOSONAR
         with self.assertRaises(Exception):
-            category.update(category.name, True)
+            category.update(category.name, True)  # NOSONAR
         with self.assertRaises(Exception):
-            category.update(category.name, {})
+            category.update(category.name, {})  # NOSONAR
         with self.assertRaises(Exception):
             category.update(category.name, 'f' * 256)
