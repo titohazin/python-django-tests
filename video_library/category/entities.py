@@ -3,7 +3,6 @@ from typing import Optional
 
 from __seedwork.entities import GenericEntity
 from __seedwork.exceptions import EntityValidationException
-from __seedwork.validators import FieldsErrs
 from .validator import CategoryValidatorFactory
 
 
@@ -27,4 +26,4 @@ class Category(GenericEntity):
     def __validate(self):
         validator = CategoryValidatorFactory.instance()
         if not validator.validate(self.to_dict()):
-            raise EntityValidationException(validator.fields_errs, FieldsErrs)
+            raise EntityValidationException(validator.fields_errs)

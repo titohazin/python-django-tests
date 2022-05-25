@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import Dict, List
 
 
 class InvalidUuidException(Exception):
@@ -6,13 +6,10 @@ class InvalidUuidException(Exception):
         super().__init__(error)
 
 
-T = TypeVar('T')
+class EntityValidationException(Exception):
 
+    fields_errors: Dict[str, List[str]]
 
-class EntityValidationException(Exception, Generic[T]):
-
-    fields_errors: T
-
-    def __init__(self, fields_errors: T) -> None:
+    def __init__(self, fields_errors: Dict[str, List[str]]) -> None:
         self.fields_errors = fields_errors
-        super.__init__('Entity validation Failed')
+        super().__init__('Entity validation Failed')

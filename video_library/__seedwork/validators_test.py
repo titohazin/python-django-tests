@@ -139,8 +139,8 @@ class DRFStrictCharFieldUnitTest(unittest.TestCase):
         class DRFStrictCharFieldSerializerStub(serializers.Serializer):
             foobar = DRFStrictCharField()
 
-        data_test = [True, 9, {}, {'any value'}, [], ['any value']]
-        for data in data_test:
+        test_data = [True, 9, {}, {'any value'}, [], ['any value']]
+        for data in test_data:
             serializer = DRFStrictCharFieldSerializerStub(data={'foobar': data})
             # Act/Assert:
             self.assertFalse(serializer.is_valid())
@@ -159,11 +159,11 @@ class DRFStrictCharFieldUnitTest(unittest.TestCase):
         class DRFStrictCharFieldSerializerStub(serializers.Serializer):
             foobar = DRFStrictCharField()
 
-        data_test = {'foobar': 'valid value'}
-        serializer = DRFStrictCharFieldSerializerStub(data=data_test)
+        test_data = {'foobar': 'valid value'}
+        serializer = DRFStrictCharFieldSerializerStub(data=test_data)
         # Act/Assert:
         self.assertTrue(serializer.is_valid())
-        self.assertEqual(serializer.validated_data, data_test)
+        self.assertEqual(serializer.validated_data, test_data)
         self.assertEqual(serializer.errors, {})
 
     def test_if_valid_when_pass_a_null_value(self):
@@ -171,11 +171,11 @@ class DRFStrictCharFieldUnitTest(unittest.TestCase):
         class DRFStrictCharFieldSerializerStub(serializers.Serializer):
             foobar = DRFStrictCharField(required=False, allow_null=True)
 
-        data_test = {'foobar': None}
-        serializer = DRFStrictCharFieldSerializerStub(data=data_test)
+        test_data = {'foobar': None}
+        serializer = DRFStrictCharFieldSerializerStub(data=test_data)
         # Act/Assert:
         self.assertTrue(serializer.is_valid())
-        self.assertEqual(serializer.validated_data, data_test)
+        self.assertEqual(serializer.validated_data, test_data)
         self.assertEqual(serializer.errors, {})
 
 
@@ -203,8 +203,8 @@ class DRFStrictBooleanFieldUnitTest(unittest.TestCase):
         class DRFStrictBooleanFieldSerializerStub(serializers.Serializer):
             foobar = DRFStrictBooleanField()
 
-        data_test = [1, 0, "1", "0", "True", "False", 'value', {}]
-        for data in data_test:
+        test_data = [1, 0, "1", "0", "True", "False", 'value', {}]
+        for data in test_data:
             serializer = DRFStrictBooleanFieldSerializerStub(
                 data={'foobar': data})
             # Act/Assert:
@@ -224,8 +224,8 @@ class DRFStrictBooleanFieldUnitTest(unittest.TestCase):
         class DRFStrictBooleanFieldSerializerStub(serializers.Serializer):
             foobar = DRFStrictBooleanField()
 
-        data_test = [True, False]
-        for data in data_test:
+        test_data = [True, False]
+        for data in test_data:
             serializer = DRFStrictBooleanFieldSerializerStub(
                 data={'foobar': data})
             # Act/Assert:
@@ -239,9 +239,9 @@ class DRFStrictBooleanFieldUnitTest(unittest.TestCase):
         class DRFStrictBooleanFieldSerializerStub(serializers.Serializer):
             foobar = DRFStrictBooleanField(required=False, allow_null=True)
 
-        data_test = {'foobar': None}
-        serializer = DRFStrictBooleanFieldSerializerStub(data=data_test)
+        test_data = {'foobar': None}
+        serializer = DRFStrictBooleanFieldSerializerStub(data=test_data)
         # Act/Assert:
         self.assertTrue(serializer.is_valid())
-        self.assertEqual(serializer.validated_data, data_test)
+        self.assertEqual(serializer.validated_data, test_data)
         self.assertEqual(serializer.errors, {})

@@ -11,7 +11,7 @@ class CategoryRules(serializers.Serializer):
         required=False, allow_null=True, allow_blank=True, max_length=255)
     is_active = DRFStrictBooleanField(required=False)
     created_at = serializers.DateTimeField(required=False)
-    updated_at = serializers.DateTimeField(required=False)
+    updated_at = serializers.DateTimeField(required=False, allow_null=True)
 
 
 class CategoryValidator(DRFFieldsValidator):
