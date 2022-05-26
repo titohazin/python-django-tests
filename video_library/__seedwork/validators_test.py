@@ -21,9 +21,9 @@ class ValidatorFieldsInterfaceUnitTests(unittest.TestCase):
     def test_if_errors_field_meets_specifications(self):
         # sourcery skip: class-extract-method
         class_fields = fields(FieldsValidatorInterface)
-        fields_errs_field = class_fields[0]
-        self.assertEqual(fields_errs_field.name, 'fields_errs')
-        self.assertIsNone(fields_errs_field.default)
+        fields_errors_field = class_fields[0]
+        self.assertEqual(fields_errors_field.name, 'fields_errors')
+        self.assertIsNone(fields_errors_field.default)
 
     def test_if_data_field_meets_specifications(self):
         class_fields = fields(FieldsValidatorInterface)
@@ -70,7 +70,7 @@ class DRFValidatorFieldsUnitTests(unittest.TestCase):
         # Assert:
         self.assertFalse(is_valid)
         mock_is_valid.assert_called_once()
-        self.assertEqual(validator.fields_errs, {'foobar': ['foo err', 'bar err']})
+        self.assertEqual(validator.fields_errors, {'foobar': ['foo err', 'bar err']})
 
 
 class SerializerStub(serializers.Serializer):
@@ -95,7 +95,7 @@ class DRFValidatorFieldsIntegrationTests(unittest.TestCase):
         self.assertFalse(is_valid)
         self.assertEqual(validator.validated_data, None)
         self.assertDictEqual(
-            validator.fields_errs,
+            validator.fields_errors,
             {
                 'foo': ['This field is required.'],
                 'bar': ['This field is required.']
@@ -111,7 +111,7 @@ class DRFValidatorFieldsIntegrationTests(unittest.TestCase):
         is_valid = validator.validate(serializer)
         # Assert:
         self.assertTrue(is_valid)
-        self.assertEqual(validator.fields_errs, None)
+        self.assertEqual(validator.fields_errors, None)
         self.assertDictEqual(validator.validated_data, data)
 
 

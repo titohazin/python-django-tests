@@ -8,14 +8,14 @@ from rest_framework.serializers import CharField
 from rest_framework.serializers import BooleanField
 
 
-FieldsErrs = Dict[str, List[str]]
+FieldsErrors = Dict[str, List[str]]
 T = TypeVar('T')
 
 
 @dataclass(slots=True)
 class FieldsValidatorInterface(ABC, Generic[T]):
 
-    fields_errs: FieldsErrs = None
+    fields_errors: FieldsErrors = None
     validated_data: T = None
 
     @abc.abstractmethod
@@ -29,7 +29,7 @@ class DRFFieldsValidator(FieldsValidatorInterface[T], ABC):
             self.validated_data = dict(serializer.validated_data)
             return True
         else:
-            self.fields_errs = {
+            self.fields_errors = {
                 field: [str(error) for error in errors]
                 for field, errors in serializer.errors.items()
             }

@@ -13,3 +13,13 @@ class EntityValidationException(Exception):
     def __init__(self, fields_errors: Dict[str, List[str]]) -> None:
         self.fields_errors = fields_errors
         super().__init__('Entity validation Failed')
+
+
+class EntityNotFoundException(Exception):
+    def __init__(self, error='Entity not found') -> None:
+        super().__init__(error)
+
+
+class EntityAlreadyExistsException(Exception):
+    def __init__(self, error='Entity already exists') -> None:
+        super().__init__(error)

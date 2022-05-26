@@ -26,4 +26,4 @@ class Category(GenericEntity):
     def __validate(self):
         validator = CategoryValidatorFactory.instance()
         if not validator.validate(self.to_dict()):
-            raise EntityValidationException(validator.fields_errs)
+            raise EntityValidationException(validator.fields_errors)

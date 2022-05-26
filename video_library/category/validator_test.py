@@ -27,7 +27,7 @@ class CategoryValidatorUnitTest(unittest.TestCase):
         for data in test_data:
             msg = f'Fail with data: {data}'
             self.assertFalse(self.validator.validate(data), msg=msg)
-            self.assertIsNotNone(self.validator.fields_errs, msg=msg)
+            self.assertIsNotNone(self.validator.fields_errors, msg=msg)
 
     def test_valid_cases_for_name_field(self):
         test_data = [
@@ -38,7 +38,7 @@ class CategoryValidatorUnitTest(unittest.TestCase):
         for data in test_data:
             msg = f'Fail with data: {data}'
             self.assertTrue(self.validator.validate(data), msg=msg)
-            self.assertIsNone(self.validator.fields_errs, msg=msg)
+            self.assertIsNone(self.validator.fields_errors, msg=msg)
             self.assertEqual(self.validator.validated_data, data, msg=msg)
 
     def test_invalid_cases_for_name_field(self):
@@ -51,8 +51,8 @@ class CategoryValidatorUnitTest(unittest.TestCase):
         for data in test_data:
             msg = f'Fail with data: {data}'
             self.assertFalse(self.validator.validate(data), msg=msg)
-            self.assertIsNotNone(self.validator.fields_errs, msg=msg)
-            self.assertIsNotNone(self.validator.fields_errs['name'], msg=msg)
+            self.assertIsNotNone(self.validator.fields_errors, msg=msg)
+            self.assertIsNotNone(self.validator.fields_errors['name'], msg=msg)
 
     def test_valid_cases_for_description_field(self):
         test_data = [
@@ -65,7 +65,7 @@ class CategoryValidatorUnitTest(unittest.TestCase):
         for data in test_data:
             msg = f'Fail with data: {data}'
             self.assertTrue(self.validator.validate(data), msg=msg)
-            self.assertIsNone(self.validator.fields_errs, msg=msg)
+            self.assertIsNone(self.validator.fields_errors, msg=msg)
             self.assertEqual(self.validator.validated_data, data, msg=msg)
 
     def test_invalid_cases_for_description_field(self):
@@ -77,9 +77,9 @@ class CategoryValidatorUnitTest(unittest.TestCase):
         for data in test_data:
             msg = f'Fail with data: {data}'
             self.assertFalse(self.validator.validate(data), msg=msg)
-            self.assertIsNotNone(self.validator.fields_errs, msg=msg)
+            self.assertIsNotNone(self.validator.fields_errors, msg=msg)
             self.assertIsNotNone(
-                self.validator.fields_errs['description'], msg=msg)
+                self.validator.fields_errors['description'], msg=msg)
 
     def test_valid_cases_for_is_active_field(self):
         test_data = [
@@ -90,7 +90,7 @@ class CategoryValidatorUnitTest(unittest.TestCase):
         for data in test_data:
             msg = f'Fail with data: {data}'
             self.assertTrue(self.validator.validate(data), msg=msg)
-            self.assertIsNone(self.validator.fields_errs, msg=msg)
+            self.assertIsNone(self.validator.fields_errors, msg=msg)
             self.assertEqual(self.validator.validated_data, data, msg=msg)
 
     def test_invalid_cases_for_is_active_field(self):
@@ -103,9 +103,9 @@ class CategoryValidatorUnitTest(unittest.TestCase):
         for data in test_data:
             msg = f'Fail with data: {data}'
             self.assertFalse(self.validator.validate(data), msg=msg)
-            self.assertIsNotNone(self.validator.fields_errs, msg=msg)
+            self.assertIsNotNone(self.validator.fields_errors, msg=msg)
             self.assertIsNotNone(
-                self.validator.fields_errs['is_active'], msg=msg)
+                self.validator.fields_errors['is_active'], msg=msg)
 
     def test_valid_cases_for_created_at_field(self):
         test_data = [
@@ -115,7 +115,7 @@ class CategoryValidatorUnitTest(unittest.TestCase):
         for data in test_data:
             msg = f'Fail with data: {data}'
             self.assertTrue(self.validator.validate(data), msg=msg)
-            self.assertIsNone(self.validator.fields_errs, msg=msg)
+            self.assertIsNone(self.validator.fields_errors, msg=msg)
             self.assertEqual(self.validator.validated_data, data, msg=msg)
 
     def test_invalid_cases_for_created_at_field(self):
@@ -126,9 +126,9 @@ class CategoryValidatorUnitTest(unittest.TestCase):
         for data in test_data:
             msg = f'Fail with data: {data}'
             self.assertFalse(self.validator.validate(data), msg=msg)
-            self.assertIsNotNone(self.validator.fields_errs, msg=msg)
+            self.assertIsNotNone(self.validator.fields_errors, msg=msg)
             self.assertIsNotNone(
-                self.validator.fields_errs['created_at'], msg=msg)
+                self.validator.fields_errors['created_at'], msg=msg)
 
     def test_valid_cases_for_updated_at_field(self):
         test_data = [
@@ -139,7 +139,7 @@ class CategoryValidatorUnitTest(unittest.TestCase):
         for data in test_data:
             msg = f'Fail with data: {data}'
             self.assertTrue(self.validator.validate(data), msg=msg)
-            self.assertIsNone(self.validator.fields_errs, msg=msg)
+            self.assertIsNone(self.validator.fields_errors, msg=msg)
             self.assertEqual(self.validator.validated_data, data, msg=msg)
 
     def test_invalid_cases_for_updated_at_field(self):
@@ -150,6 +150,6 @@ class CategoryValidatorUnitTest(unittest.TestCase):
         for data in test_data:
             msg = f'Fail with data: {data}'
             self.assertFalse(self.validator.validate(data), msg=msg)
-            self.assertIsNotNone(self.validator.fields_errs, msg=msg)
+            self.assertIsNotNone(self.validator.fields_errors, msg=msg)
             self.assertIsNotNone(
-                self.validator.fields_errs['updated_at'], msg=msg)
+                self.validator.fields_errors['updated_at'], msg=msg)
