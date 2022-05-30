@@ -2,6 +2,7 @@ from abc import ABC
 import abc
 import copy
 from dataclasses import dataclass, field
+import math
 from typing import Any, List, Optional, TypeVar, Generic
 
 from .value_objects import UniqueEntityId
@@ -62,7 +63,7 @@ class SearchParams(Generic[Filter]):
     def __normalize_page(self):
         default = self.__get_dataclass_field('page').default
         page = self.__convert_value_to_int(self.page, default)
-        self.page = default if page < 0 else page
+        self.page = default if page < 1 else page
 
     def __normalize_per_page(self):
         default = self.__get_dataclass_field('per_page').default
@@ -70,20 +71,19 @@ class SearchParams(Generic[Filter]):
         self.per_page = default if per_page < 1 else per_page
 
     def __normalize_sort_by(self):
-        self.sort_by = None if self.sort_by == '' else str(self.sort_by)
+        self.sort_by = None if self.sort_by == '' or self.sort_by is None \
+            else str(self.sort_by)
 
     def __normalize_sort_dir(self):
-        if not self.sort_by:
+        if self.sort_dir == '' or self.sort_dir is None:
             self.sort_dir = None
             return
         sort_dir = str(self.sort_dir).lower()
         self.sort_dir = 'asc' if sort_dir not in ['asc', 'desc'] else sort_dir
 
     def __normalize_filter(self):
-        if self.filter == '' or self.filter is None:
-            self.filter = None
-            return
-        self.filter = self.filter if isinstance(self.filter, Filter) else str(self.filter)
+        self.filter = None if self.filter == '' or self.filter is None \
+            else str(self.filter)
 
     def __convert_value_to_int(self, value: Any, default=0) -> int:
         try:
@@ -93,6 +93,35 @@ class SearchParams(Generic[Filter]):
 
     def __get_dataclass_field(self, field_name: str) -> Any:
         return SearchParams.__dataclass_fields__[field_name]
+
+
+@dataclass(slots=True, kw_only=True, frozen=True)
+class SearchResult(Generic[T, Filter]):
+
+    items: List[T]
+    total: int
+    current_page: int
+    per_page: int
+    last_page: int = field(init=False)
+    sort_by: Optional[str] = None
+    sort_dir: Optional[str] = None
+    filter: Optional[Filter] = None
+
+    def __post_init__(self):
+        object.__setattr__(self, 'last_page', math.ceil(
+            self.total / self.per_page))
+
+    def to_dict(self) -> dict:
+        return {
+            'items': self.items,
+            'total': self.total,
+            'current_page': self.current_page,
+            'per_page': self.per_page,
+            'last_page': self.last_page,
+            'sort_by': self.sort_by,
+            'sort_dir': self.sort_dir,
+            'filter': self.filter
+        }
 
 
 @dataclass(slots=True)

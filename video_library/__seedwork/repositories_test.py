@@ -1,8 +1,21 @@
 from dataclasses import dataclass
+from typing import Optional, List
 import unittest
 
 from .entities import GenericEntity
-from .repositories import InMemoryRepository, RepositoryInterface, SearchableRepositoryInterface
+from .repositories import T, Filter
+from .repositories import RepositoryInterface, SearchableRepositoryInterface
+from .repositories import SearchParams, SearchResult
+from .repositories import InMemoryRepository
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class EntityStub(GenericEntity):
+    foo: str = "value"
+    bar: float = 1.0
+
+    def update(self, foo: str) -> None:
+        self._set_attr('foo', foo)
 
 
 class RepositoryInterfaceUnitTest(unittest.TestCase):
@@ -27,13 +40,238 @@ class SearchableRepositoryInterfaceUnitTest(unittest.TestCase):
             "abstract methods create, delete, find_all, find_by_id, search, update")
 
 
-@dataclass(frozen=True, kw_only=True, slots=True)
-class EntityStub(GenericEntity):
-    foo: str = "value"
-    bar: float = 1.0
+class SearchParamsUnitTest(unittest.TestCase):
 
-    def update(self, foo: str) -> None:
-        self._set_attr('foo', foo)
+    def test_props_annotations(self):
+        self.assertEqual(SearchParams.__annotations__, {
+            'page': Optional[int],
+            'per_page': Optional[int],
+            'sort_by': Optional[str],
+            'sort_dir': Optional[str],
+            'filter': Optional[Filter]
+        })
+
+    def test_props_default_value(self):
+        params = SearchParams()
+        # sourcery skip: class-extract-method
+        self.assertEqual(params.page, 1)
+        self.assertEqual(params.per_page, 10)
+        self.assertIsNone(params.sort_by)
+        self.assertIsNone(params.sort_dir)
+        self.assertIsNone(params.filter)
+
+    def test_props_default_value_when_pass_none_value(self):
+        params = SearchParams(
+            page=None, per_page=None, sort_by=None, sort_dir=None, filter=None)
+        self.assertEqual(params.page, 1)
+        self.assertEqual(params.per_page, 10)
+        self.assertIsNone(params.sort_by)
+        self.assertIsNone(params.sort_dir)
+        self.assertIsNone(params.filter)
+
+    def test_props_default_value_when_pass_empty_value(self):
+        params = SearchParams(
+            page='', per_page='', sort_by='', sort_dir='', filter='')
+        self.assertEqual(params.page, 1)
+        self.assertEqual(params.per_page, 10)
+        self.assertIsNone(params.sort_by)
+        self.assertIsNone(params.sort_dir)
+        self.assertIsNone(params.filter)
+
+    def test_page_prop(self):
+        arrange = [
+            {'value': 9999, 'expected': 9999},
+            {'value': 0, 'expected': 1},
+            {'value': '0', 'expected': 1},
+            {'value': 1.9, 'expected': 1},
+            {'value': 1.3, 'expected': 1},
+            {'value': '1', 'expected': 1},
+            {'value': True, 'expected': 1},
+            {'value': False, 'expected': 1},
+            {'value': None, 'expected': 1},
+            {'value': -1, 'expected': 1},
+            {'value': '1.1', 'expected': 1},
+            {'value': '', 'expected': 1},
+            {'value': 'fake', 'expected': 1},
+            {'value': {}, 'expected': 1},
+            {'value': [], 'expected': 1}
+        ]
+        for i in arrange:
+            msg = f'Failed with data: {i}'
+            self.assertEqual(SearchParams(
+                page=i['value']).page, i['expected'], msg=msg)
+
+    def test_per_page_prop(self):
+        arrange = [
+            {'value': 9999, 'expected': 9999},
+            {'value': 1.9, 'expected': 1},
+            {'value': 1.3, 'expected': 1},
+            {'value': '1', 'expected': 1},
+            {'value': True, 'expected': 1},
+            {'value': False, 'expected': 10},
+            {'value': None, 'expected': 10},
+            {'value': 0, 'expected': 10},
+            {'value': '0', 'expected': 10},
+            {'value': -1, 'expected': 10},
+            {'value': '-1', 'expected': 10},
+            {'value': '1.1', 'expected': 10},
+            {'value': '', 'expected': 10},
+            {'value': 'fake', 'expected': 10},
+            {'value': {}, 'expected': 10},
+            {'value': [], 'expected': 10}
+        ]
+        for i in arrange:
+            msg = f'Failed with data: {i}'
+            self.assertEqual(SearchParams(
+                per_page=i['value']).per_page, i['expected'], msg=msg)
+
+    def test_sort_by_prop(self):
+        arrange = [
+            {'value': None, 'expected': None},
+            {'value': '', 'expected': None},
+            {'value': 'value', 'expected': 'value'},
+            {'value': 0, 'expected': '0'},
+            {'value': '0', 'expected': '0'},
+            {'value': -1, 'expected': '-1'},
+            {'value': '-1', 'expected': '-1'},
+            {'value': 1.9, 'expected': '1.9'},
+            {'value': True, 'expected': 'True'},
+            {'value': False, 'expected': 'False'},
+            {'value': {}, 'expected': '{}'},
+            {'value': [], 'expected': '[]'}
+        ]
+        for i in arrange:
+            msg = f'Failed with data: {i}'
+            self.assertEqual(SearchParams(
+                sort_by=i['value']).sort_by, i['expected'], msg=msg)
+
+    def test_sort_dir_prop(self):
+        arrange = [
+            {'value': None, 'expected': None},
+            {'value': '', 'expected': None},
+            {'value': 'asc', 'expected': 'asc'},
+            {'value': 'aSc', 'expected': 'asc'},
+            {'value': 'desc', 'expected': 'desc'},
+            {'value': 'desC', 'expected': 'desc'},
+            {'value': 'value', 'expected': 'asc'},
+            {'value': 0, 'expected': 'asc'},
+            {'value': '0', 'expected': 'asc'},
+            {'value': -1, 'expected': 'asc'},
+            {'value': '-1', 'expected': 'asc'},
+            {'value': 1.9, 'expected': 'asc'},
+            {'value': True, 'expected': 'asc'},
+            {'value': False, 'expected': 'asc'},
+            {'value': {}, 'expected': 'asc'},
+            {'value': [], 'expected': 'asc'}
+        ]
+        for i in arrange:
+            msg = f'Failed with data: {i}'
+            self.assertEqual(SearchParams(
+                sort_dir=i['value']).sort_dir, i['expected'], msg=msg)
+
+    def test_filter_prop(self):
+        arrange = [
+            {'value': None, 'expected': None},
+            {'value': '', 'expected': None},
+            {'value': 'value', 'expected': 'value'},
+            {'value': 0, 'expected': '0'},
+            {'value': '0', 'expected': '0'},
+            {'value': -1, 'expected': '-1'},
+            {'value': '-1', 'expected': '-1'},
+            {'value': 1.9, 'expected': '1.9'},
+            {'value': True, 'expected': 'True'},
+            {'value': False, 'expected': 'False'},
+            {'value': {}, 'expected': '{}'},
+            {'value': [], 'expected': '[]'}
+        ]
+        for i in arrange:
+            msg = f'Failed with data: {i}'
+            self.assertEqual(SearchParams(filter=i['value']).filter, i['expected'], msg=msg)
+
+
+class SearchResultUnitTest(unittest.TestCase):
+
+    def test_props_annotations(self):
+        self.assertEqual(SearchResult.__annotations__, {
+            'items': List[T],
+            'total': int,
+            'current_page': int,
+            'last_page': int,
+            'per_page': int,
+            'sort_by': Optional[str],
+            'sort_dir': Optional[str],
+            'filter': Optional[Filter]
+        })
+
+    def test_constructor(self):
+        entity_1 = EntityStub()
+        entity_2 = EntityStub()
+        result = SearchResult(
+            items=[entity_1, entity_2],
+            total=100,
+            current_page=1,
+            per_page=2,
+            sort_by='foo',
+            sort_dir='desc',
+            filter='value'
+        )
+        self.assertDictEqual(result.to_dict(), {
+            'items': [entity_1, entity_2],
+            'total': 100,
+            'current_page': 1,
+            'per_page': 2,
+            'last_page': 50,
+            'sort_by': 'foo',
+            'sort_dir': 'desc',
+            'filter': 'value'
+        })
+
+    def test_constructor_with_default_values(self):
+        entity_1 = EntityStub()
+        entity_2 = EntityStub()
+        result = SearchResult(
+            items=[entity_1, entity_2],
+            total=100,
+            current_page=1,
+            per_page=2
+        )
+        self.assertDictEqual(result.to_dict(), {
+            'items': [entity_1, entity_2],
+            'total': 100,
+            'current_page': 1,
+            'per_page': 2,
+            'last_page': 50,
+            'sort_by': None,
+            'sort_dir': None,
+            'filter': None
+        })
+
+    def test_last_page_when_per_page_is_greater_than_total(self):
+        result = SearchResult(
+            items=[],
+            total=4,
+            current_page=1,
+            per_page=10
+        )
+        self.assertEqual(result.last_page, 1)
+
+    def test_last_page_when_per_page_is_less_than_total(self):
+        result = SearchResult(
+            items=[],
+            total=100,
+            current_page=1,
+            per_page=10
+        )
+        self.assertEqual(result.last_page, 10)
+
+    def test_last_page_when_per_page_and_total_are_not_multiples(self):
+        result = SearchResult(
+            items=[],
+            total=91,
+            current_page=1,
+            per_page=10
+        )
+        self.assertEqual(result.last_page, 10)
 
 
 class InMemoryRepositoryUnitTest(unittest.TestCase):
