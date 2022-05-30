@@ -36,8 +36,10 @@ Output = TypeVar('Output')
 
 class SearchableRepositoryInterface(Generic[T, Input, Output], RepositoryInterface[T], ABC):
 
+    sortable_fields: List[str] = []
+
     @abc.abstractmethod
-    def search(self, input_: Input) -> List[Output]: ...
+    def search(self, input_: Input) -> Output: ...
 
 
 # sourcery skip: avoid-builtin-shadow
@@ -51,7 +53,7 @@ class SearchParams(Generic[Filter]):
     per_page: Optional[int] = 10
     sort_by: Optional[str] = None
     sort_dir: Optional[str] = None
-    filter: Optional[Filter] = None
+    filter_: Optional[Filter] = None
 
     def __post_init__(self):
         self.__normalize_page()
@@ -82,8 +84,8 @@ class SearchParams(Generic[Filter]):
         self.sort_dir = 'asc' if sort_dir not in ['asc', 'desc'] else sort_dir
 
     def __normalize_filter(self):
-        self.filter = None if self.filter == '' or self.filter is None \
-            else str(self.filter)
+        self.filter_ = None if self.filter_ == '' or self.filter_ is None \
+            else str(self.filter_)
 
     def __convert_value_to_int(self, value: Any, default=0) -> int:
         try:
@@ -105,7 +107,7 @@ class SearchResult(Generic[T, Filter]):
     last_page: int = field(init=False)
     sort_by: Optional[str] = None
     sort_dir: Optional[str] = None
-    filter: Optional[Filter] = None
+    filter_: Optional[Filter] = None
 
     def __post_init__(self):
         object.__setattr__(self, 'last_page', math.ceil(
@@ -120,20 +122,20 @@ class SearchResult(Generic[T, Filter]):
             'last_page': self.last_page,
             'sort_by': self.sort_by,
             'sort_dir': self.sort_dir,
-            'filter': self.filter
+            'filter': self.filter_
         }
 
 
 @dataclass(slots=True)
 class InMemoryRepository(Generic[T], RepositoryInterface[T]):
 
-    __entities: List[T] = field(default_factory=lambda: [])
+    _items: List[T] = field(default_factory=lambda: [])
 
     def find_all(self) -> List[T]:
-        return copy.copy(self.__entities)
+        return copy.copy(self._items)
 
     def find_by_id(self, id_: str | UniqueEntityId) -> T:
-        entity = next(filter(lambda e: e.id == str(id_), self.__entities), None)
+        entity = next(filter(lambda e: e.id == str(id_), self._items), None)
         if entity is None:
             raise EntityNotFoundException(
                 f'Entity not found using ID: {id_}')
@@ -141,17 +143,54 @@ class InMemoryRepository(Generic[T], RepositoryInterface[T]):
             return copy.copy(entity)
 
     def create(self, entity: T) -> None:
-        found = next(filter(lambda e: e.id == str(entity.id), self.__entities), None)
+        found = next(filter(lambda e: e.id == str(entity.id), self._items), None)
         if found is None:
-            self.__entities.append(copy.copy(entity))
+            self._items.append(copy.copy(entity))
         else:
             raise EntityAlreadyExistsException(
                 f'Entity already exists using ID: {entity.id}')
 
     def update(self, entity: T) -> None:
         found = self.find_by_id(entity.id)
-        found_index = self.__entities.index(found)
-        self.__entities[found_index] = copy.copy(entity)
+        found_index = self._items.index(found)
+        self._items[found_index] = copy.copy(entity)
 
     def delete(self, id_: str | UniqueEntityId) -> None:
-        self.__entities.remove(self.find_by_id(id_))
+        self._items.remove(self.find_by_id(id_))
+
+
+class InMemorySearchableRepository(
+    Generic[T, Filter],
+    InMemoryRepository[T],
+    SearchableRepositoryInterface[T, SearchParams[Filter], SearchResult[T, Filter]],
+    ABC
+):
+
+    def search(self, input_: SearchParams[Filter]) -> SearchResult[T, Filter]:
+
+        items = self._apply_filter(copy.copy(self._items), input_.filter_)
+        items = self._apply_sort(items, input_.sort_by, input_.sort_dir)
+        items = self._apply_pagination(items, input_.page, input_.per_page)
+
+        return SearchResult(
+            items=self._searched_items,
+            total=len(self._searched_items),
+            current_page=input_.page,
+            per_page=input_.per_page,
+            sort_by=input_.sort_by,
+            sort_dir=input_.sort_dir,
+            filter_=input_.filter_
+        )
+
+    @abc.abstractmethod
+    def _apply_filter(self, items: List[T], filter: Filter | None) -> List[T]: ...
+
+    def _apply_sort(self, items: List[T], sort_by: str | None, sort_dir: str | None = None) -> List[T]:
+        if sort_by and sort_by in self.sortable_fields:
+            return sorted(items, key=lambda item: getattr(item, sort_by), reverse=sort_dir == 'desc')
+        return items
+
+    def _apply_pagination(self, items: List[T], page: int, per_page: int) -> List[T]:
+        start = (page - 1) * per_page
+        limit = start + per_page
+        return items[slice(start, limit)]
