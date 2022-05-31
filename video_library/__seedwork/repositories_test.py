@@ -149,10 +149,16 @@ class SearchParamsUnitTest(unittest.TestCase):
             self.assertEqual(SearchParams(
                 sort_by=i['value']).sort_by, i['expected'], msg=msg)
 
-    def test_sort_dir_prop(self):
+    def test_sort_dir_prop_when_sort_by_is_none(self):
+        arrange = [None, '', 'asc', 'desc']
+        for i in arrange:
+            msg = f'Failed with data: {i}'
+            self.assertEqual(SearchParams(sort_dir=i).sort_dir, None, msg=msg)
+
+    def test_sort_dir_prop_when_sort_by_is_not_none(self):
         arrange = [
-            {'value': None, 'expected': None},
-            {'value': '', 'expected': None},
+            {'value': None, 'expected': 'asc'},
+            {'value': '', 'expected': 'asc'},
             {'value': 'asc', 'expected': 'asc'},
             {'value': 'aSc', 'expected': 'asc'},
             {'value': 'desc', 'expected': 'desc'},
@@ -171,6 +177,7 @@ class SearchParamsUnitTest(unittest.TestCase):
         for i in arrange:
             msg = f'Failed with data: {i}'
             self.assertEqual(SearchParams(
+                sort_by='foo',
                 sort_dir=i['value']).sort_dir, i['expected'], msg=msg)
 
     def test_filter_prop(self):
@@ -417,38 +424,37 @@ class InMemorySearchableRepositoryUnitTest(unittest.TestCase):
         filtered_items = self.repo._apply_filter(items, '10.0')
         self.assertEqual(len(filtered_items), 1)
 
-    def test_apply_sort(self):  # sourcery skip: extract-duplicate-method
-        variation = random.sample(range(20), 20)
+    def test_apply_sort_when_pass_empty_props(self):
+        variation = random.sample(range(3), 3)
         items = [EntityStub(foo=f"{i}", bar=float(i)) for i in variation]
         sorted_items = self.repo._apply_sort(items, None)
         self.assertEqual(sorted_items, items)
         sorted_items = self.repo._apply_sort(items, None, None)
         self.assertEqual(sorted_items, items)
-        sorted_items = self.repo._apply_sort(items, 'fake_prop')
+        sorted_items = self.repo._apply_sort(items, None, 'asc')
         self.assertEqual(sorted_items, items)
-        sorted_items = self.repo._apply_sort(items, 'foo')
+
+    def test_apply_sort_when_pass_invalid_props(self):
+        variation = random.sample(range(20), 20)
+        items = [EntityStub(foo=f"{i}", bar=float(i)) for i in variation]
+        sorted_items = self.repo._apply_sort(items, 'fake_sort_by')
+        self.assertEqual(sorted_items, items)
+        sorted_items = self.repo._apply_sort(items, 'foo', 'fake_sort_dir')
         self.assertEqual(sorted_items[0].foo, '0')
         self.assertEqual(sorted_items[10].foo, '18')
+        self.assertEqual(sorted_items[19].foo, '9')
+
+    def test_apply_sort_when_pass_valid_props(self):
+        variation = random.sample(range(20), 20)
+        items = [EntityStub(foo=f"{i}", bar=float(i)) for i in variation]
+        sorted_items = self.repo._apply_sort(items, 'foo')
+        self.assertEqual(sorted_items[0].foo, '0')
         self.assertEqual(sorted_items[19].foo, '9')
         sorted_items = self.repo._apply_sort(items, 'foo', 'asc')
         self.assertEqual(sorted_items[0].foo, '0')
-        self.assertEqual(sorted_items[10].foo, '18')
         self.assertEqual(sorted_items[19].foo, '9')
-        sorted_items = self.repo._apply_sort(items, 'foo', 'desc')
-        self.assertEqual(sorted_items[0].foo, '9')
-        self.assertEqual(sorted_items[10].foo, '17')
-        self.assertEqual(sorted_items[19].foo, '0')
-        sorted_items = self.repo._apply_sort(items, 'foo', 'fake_dir')
-        self.assertEqual(sorted_items[0].foo, '0')
-        self.assertEqual(sorted_items[10].foo, '18')
-        self.assertEqual(sorted_items[19].foo, '9')
-        sorted_items = self.repo._apply_sort(items, 'bar', 'asc')
-        self.assertEqual(sorted_items[0].bar, 0.0)
-        self.assertEqual(sorted_items[10].bar, 10.0)
-        self.assertEqual(sorted_items[19].bar, 19.0)
         sorted_items = self.repo._apply_sort(items, 'bar', 'desc')
         self.assertEqual(sorted_items[0].bar, 19.0)
-        self.assertEqual(sorted_items[10].bar, 9.0)
         self.assertEqual(sorted_items[19].bar, 0.0)
 
     def test_apply_pagination(self):
@@ -464,3 +470,173 @@ class InMemorySearchableRepositoryUnitTest(unittest.TestCase):
         self.assertEqual(paginated_items, [items[9]])
         paginated_items = self.repo._apply_pagination(items, 5, 3)
         self.assertEqual(paginated_items, [])
+
+    def test_search_when_parameters_are_empty(self):
+        variation = random.sample(range(25), 25)
+        items = [EntityStub(foo=f"foo_{i}", bar=float(i)) for i in variation]
+        self.repo._items = items
+        result = self.repo.search(SearchParams())
+        self.assertEqual(result, SearchResult(
+            items=items[:10],
+            total=25,
+            current_page=1,
+            per_page=10,
+            sort_by=None,
+            sort_dir=None,
+            filter_=None
+        ))
+        self.assertEqual(result.last_page, 3)
+
+    def test_search_applying_filter_and_pagination(self):
+        items = self.repo._items = [
+            EntityStub(foo='foo', bar=1.0),
+            EntityStub(foo='bar', bar=2.0),
+            EntityStub(foo='BAR', bar=2.0),
+            EntityStub(foo='FoO', bar=2.0),
+            EntityStub(foo='FOO', bar=3.0),
+            EntityStub(foo='Foo', bar=3.0),
+        ]
+        self.assertEqual(
+            self.repo.search(SearchParams(page=1, per_page=2, filter_='FOO')),
+            SearchResult(
+                items=[items[0], items[3]],
+                total=4,
+                current_page=1,
+                per_page=2,
+                sort_by=None,
+                sort_dir=None,
+                filter_='FOO'
+            )
+        )
+        self.assertEqual(
+            self.repo.search(SearchParams(page=2, per_page=2, filter_='FOO')),
+            SearchResult(
+                items=[items[4], items[5]],
+                total=4,
+                current_page=2,
+                per_page=2,
+                sort_by=None,
+                sort_dir=None,
+                filter_='FOO'
+            )
+        )
+        self.assertEqual(
+            self.repo.search(SearchParams(
+                page=1, per_page=1, filter_='BAR')),
+            SearchResult(
+                items=[items[1]],
+                total=2,
+                current_page=1,
+                per_page=1,
+                sort_by=None,
+                sort_dir=None,
+                filter_='BAR'
+            )
+        )
+        self.assertEqual(
+            self.repo.search(SearchParams(
+                page=3, per_page=1, filter_='bAr')),
+            SearchResult(
+                items=[],
+                total=2,
+                current_page=3,
+                per_page=1,
+                sort_by=None,
+                sort_dir=None,
+                filter_='bAr'
+            )
+        )
+
+    def test_search_applying_sort_and_pagination(self):
+        items = self.repo._items = [
+            EntityStub(foo='foo', bar=5.0),
+            EntityStub(foo='bar', bar=10.0),
+            EntityStub(foo='FoO', bar=2.0),
+            EntityStub(foo='FOO', bar=3.0),
+            EntityStub(foo='BAR', bar=7.0),
+            EntityStub(foo='Foo', bar=1.0),
+        ]
+        self.assertEqual(
+            self.repo.search(SearchParams(page=2, per_page=2, sort_by='foo')),
+            SearchResult(
+                items=[items[0], items[2]],
+                total=6,
+                current_page=2,
+                per_page=2,
+                sort_by='foo',
+                sort_dir='asc',
+                filter_=None
+            )
+        )
+        self.assertEqual(
+            self.repo.search(SearchParams(
+                page=1, per_page=2, sort_by='bar', sort_dir=None)),
+            SearchResult(
+                items=[items[5], items[2]],
+                total=6,
+                current_page=1,
+                per_page=2,
+                sort_by='bar',
+                sort_dir='asc',
+                filter_=None
+            )
+        )
+        self.assertEqual(
+            self.repo.search(SearchParams(
+                page=1, per_page=2, sort_by='bar', sort_dir='desc')),
+            SearchResult(
+                items=[items[1], items[4]],
+                total=6,
+                current_page=1,
+                per_page=2,
+                sort_by='bar',
+                sort_dir='desc',
+                filter_=None
+            )
+        )
+
+    def test_search_when_combine_all_parameters_case_1(self):
+        variation = random.sample(range(25), 25)
+        items = [EntityStub(foo=f"foo_{i}", bar=float(i)) for i in variation]
+        self.repo._items = items
+        comp_items = sorted(
+            list(filter(lambda i: i.foo in ['foo_1', 'foo_10'], items)),
+            key=lambda i: i.foo,
+            reverse=True
+        )
+        self.assertEqual(
+            self.repo.search(SearchParams(
+                page=4, per_page=3, sort_by='foo', sort_dir='desc', filter_='_1')),
+            SearchResult(
+                items=comp_items,
+                total=11,
+                current_page=4,
+                per_page=3,
+                sort_by='foo',
+                sort_dir='desc',
+                filter_='_1'
+            )
+        )
+
+    def test_search_when_combine_all_parameters_case_2(self):
+        variation = random.sample(range(25), 25)
+        items = [EntityStub(foo=f"foo_{i}", bar=float(i)) for i in variation]
+        self.repo._items = items
+        comp_items = sorted(
+            list(filter(lambda i: i.foo in ['foo_11', 'foo_12', 'foo_13'], items)),
+            key=lambda i: i.foo,
+            reverse=True
+        )
+        self.assertEqual(
+            self.repo.search(SearchParams(
+                page=3, per_page=3, sort_by='foo', sort_dir='desc', filter_='_1')),
+            SearchResult(
+                items=comp_items,
+                total=11,
+                current_page=3,
+                per_page=3,
+                sort_by='foo',
+                sort_dir='desc',
+                filter_='_1'
+            )
+        )

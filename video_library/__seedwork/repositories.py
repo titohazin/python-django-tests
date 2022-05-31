@@ -78,6 +78,9 @@ class SearchParams(Generic[Filter]):
 
     def __normalize_sort_dir(self):
         if self.sort_dir == '' or self.sort_dir is None:
+            self.sort_dir = 'asc' if self.sort_by else None
+            return
+        if self.sort_by is None:
             self.sort_dir = None
             return
         sort_dir = str(self.sort_dir).lower()
@@ -168,13 +171,13 @@ class InMemorySearchableRepository(
 
     def search(self, input_: SearchParams[Filter]) -> SearchResult[T, Filter]:
 
-        items = self._apply_filter(copy.copy(self._items), input_.filter_)
-        items = self._apply_sort(items, input_.sort_by, input_.sort_dir)
-        items = self._apply_pagination(items, input_.page, input_.per_page)
+        items_filtered = self._apply_filter(self._items, input_.filter_)
+        items_sorted = self._apply_sort(items_filtered, input_.sort_by, input_.sort_dir)
+        items_paginated = self._apply_pagination(items_sorted, input_.page, input_.per_page)
 
         return SearchResult(
-            items=self._searched_items,
-            total=len(self._searched_items),
+            items=items_paginated,
+            total=len(items_filtered),
             current_page=input_.page,
             per_page=input_.per_page,
             sort_by=input_.sort_by,
@@ -187,7 +190,10 @@ class InMemorySearchableRepository(
 
     def _apply_sort(self, items: List[T], sort_by: str | None, sort_dir: str | None = None) -> List[T]:
         if sort_by and sort_by in self.sortable_fields:
-            return sorted(items, key=lambda item: getattr(item, sort_by), reverse=sort_dir == 'desc')
+            is_reverse = sort_dir == 'desc'
+            key = (lambda i: getattr(i, sort_by).lower() if isinstance(
+                getattr(i, sort_by), str) else getattr(i, sort_by))
+            return sorted(items, key=key, reverse=is_reverse)
         return items
 
     def _apply_pagination(self, items: List[T], page: int, per_page: int) -> List[T]:
