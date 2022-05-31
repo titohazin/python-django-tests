@@ -19,7 +19,7 @@ class EntityStub(GenericEntity):
         self._set_attr('foo', foo)
 
 
-class RepositoryInterfaceUnitTest(unittest.TestCase):
+class RepositoryInterfaceUnitTests(unittest.TestCase):
 
     def test_if_are_a_abstract_class_and_abstract_methods(self):
         with self.assertRaises(TypeError) as assert_error:
@@ -30,7 +30,7 @@ class RepositoryInterfaceUnitTest(unittest.TestCase):
             "with abstract methods create, delete, find_all, find_by_id, update")
 
 
-class SearchableRepositoryInterfaceUnitTest(unittest.TestCase):
+class SearchableRepositoryInterfaceUnitTests(unittest.TestCase):
 
     def test_if_are_a_abstract_class_and_abstract_methods(self):
         with self.assertRaises(TypeError) as assert_error:
@@ -44,7 +44,7 @@ class SearchableRepositoryInterfaceUnitTest(unittest.TestCase):
         self.assertEqual(SearchableRepositoryInterface.sortable_fields, [])
 
 
-class SearchParamsUnitTest(unittest.TestCase):
+class SearchParamsUnitTests(unittest.TestCase):
 
     def test_props_annotations(self):
         self.assertEqual(SearchParams.__annotations__, {
@@ -200,7 +200,7 @@ class SearchParamsUnitTest(unittest.TestCase):
             self.assertEqual(SearchParams(filter_=i['value']).filter_, i['expected'], msg=msg)
 
 
-class SearchResultUnitTest(unittest.TestCase):
+class SearchResultUnitTests(unittest.TestCase):
 
     def test_props_annotations(self):
         self.assertEqual(SearchResult.__annotations__, {
@@ -285,7 +285,7 @@ class SearchResultUnitTest(unittest.TestCase):
         self.assertEqual(result.last_page, 10)
 
 
-class InMemoryRepositoryUnitTest(unittest.TestCase):
+class InMemoryRepositoryUnitTests(unittest.TestCase):
 
     repo: InMemoryRepository[EntityStub]
 
@@ -408,7 +408,7 @@ class InMemorySearchableRepositoryStub(InMemorySearchableRepository[EntityStub, 
         return items
 
 
-class InMemorySearchableRepositoryUnitTest(unittest.TestCase):
+class InMemorySearchableRepositoryUnitTests(unittest.TestCase):
 
     repo: InMemorySearchableRepositoryStub
 

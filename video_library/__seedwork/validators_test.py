@@ -115,7 +115,7 @@ class DRFValidatorFieldsIntegrationTests(unittest.TestCase):
         self.assertDictEqual(validator.validated_data, data)
 
 
-class DRFStrictCharFieldUnitTest(unittest.TestCase):
+class DRFStrictCharFieldUnitTests(unittest.TestCase):
 
     def setUp(self) -> None:
         # Required configuration for integration tests (Django)
@@ -179,7 +179,7 @@ class DRFStrictCharFieldUnitTest(unittest.TestCase):
         self.assertEqual(serializer.errors, {})
 
 
-class DRFStrictBooleanFieldUnitTest(unittest.TestCase):
+class DRFStrictBooleanFieldUnitTests(unittest.TestCase):
 
     def setUp(self) -> None:
         # Required configuration for integration tests (Django)
