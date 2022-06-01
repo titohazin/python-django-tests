@@ -12,6 +12,11 @@ from .validators import DRFStrictCharField, DRFStrictBooleanField
 
 class ValidatorFieldsInterfaceUnitTests(unittest.TestCase):
 
+    def setUp(self):
+        # Required configuration for integration tests (Django)
+        if not settings.configured:
+            settings.configure(USE_I18N=False)
+
     def test_if_validate_method_is_abstract(self):
         with self.assertRaises(TypeError) as assert_error:
             FieldsValidatorInterface().validate()
@@ -33,6 +38,11 @@ class ValidatorFieldsInterfaceUnitTests(unittest.TestCase):
 
 
 class DRFValidatorFieldsUnitTests(unittest.TestCase):
+
+    def setUp(self):
+        # Required configuration for integration tests (Django)
+        if not settings.configured:
+            settings.configure(USE_I18N=False)
 
     @patch.object(Serializer, 'is_valid', return_value=True)
     @patch.object(

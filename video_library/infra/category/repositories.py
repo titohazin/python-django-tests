@@ -5,7 +5,7 @@ from category.repositories import CategoryRepository
 from category.entities import Category
 
 
-class CategorySearchableInMemoryRepository(CategoryRepository, InMemorySearchableRepository):
+class CategoryInMemoryRepository(CategoryRepository, InMemorySearchableRepository):
 
     sortable_fields: List[str] = [
         'name',
@@ -30,6 +30,7 @@ class CategorySearchableInMemoryRepository(CategoryRepository, InMemorySearchabl
 
 
 class CategoryRepositoryFactory:
+
     @staticmethod
     def instance():
-        return CategorySearchableInMemoryRepository()
+        return CategoryInMemoryRepository()

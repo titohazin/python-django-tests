@@ -38,7 +38,7 @@ class GenericEntityUnitTests(unittest.TestCase):
         # Assert:
         self.assertEqual(entity.prop, prop_test)
         self.assertIsInstance(entity.unique_entity_id, UniqueEntityId)
-        self.assertEqual(entity.unique_entity_id.id, entity.id)
+        self.assertEqual(entity.unique_entity_id.id_, entity.id)
 
     def test_if_accept_a_valid_uuid(self):
         # Arrange:

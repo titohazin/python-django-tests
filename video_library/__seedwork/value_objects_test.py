@@ -83,8 +83,8 @@ class UniqueEntityIdUnitTests(unittest.TestCase):
         unique_entity_id_1 = UniqueEntityId(uuid_test)
         unique_entity_id_2 = UniqueEntityId(uuid_str_test)
         # Assert:
-        self.assertEqual(str(uuid_test), unique_entity_id_1.id)
-        self.assertEqual(uuid_str_test, unique_entity_id_2.id)
+        self.assertEqual(str(uuid_test), unique_entity_id_1.id_)
+        self.assertEqual(uuid_str_test, unique_entity_id_2.id_)
 
     def test_auto_generate_uuid_is_valid(self):
         # Arrange:
@@ -92,7 +92,7 @@ class UniqueEntityIdUnitTests(unittest.TestCase):
         assert_result = False
         # Act:
         try:
-            uuid.UUID(unique_entity_id.id)
+            uuid.UUID(unique_entity_id.id_)
             assert_result = True
         except Exception:
             assert_result = False
@@ -103,7 +103,7 @@ class UniqueEntityIdUnitTests(unittest.TestCase):
         # Arrange/Act/Assert:
         with self.assertRaises(FrozenInstanceError):
             unique_entity_id = UniqueEntityId()
-            unique_entity_id.id = str(uuid.uuid4())
+            unique_entity_id.id_ = str(uuid.uuid4())
 
     def test_if_validate_method_was_call_once(self):
         # Arrange:

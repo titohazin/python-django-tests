@@ -27,7 +27,7 @@ class RepositoryInterfaceUnitTests(unittest.TestCase):
         self.assertEqual(
             assert_error.exception.args[0],
             "Can't instantiate abstract class RepositoryInterface " +
-            "with abstract methods create, delete, find_all, find_by_id, update")
+            "with abstract methods delete, find_all, find_by_id, insert, update")
 
 
 class SearchableRepositoryInterfaceUnitTests(unittest.TestCase):
@@ -38,7 +38,7 @@ class SearchableRepositoryInterfaceUnitTests(unittest.TestCase):
         self.assertEqual(
             assert_error.exception.args[0],
             "Can't instantiate abstract class SearchableRepositoryInterface with " +
-            "abstract methods create, delete, find_all, find_by_id, search, update")
+            "abstract methods delete, find_all, find_by_id, insert, search, update")
 
     def test_sortable_fields_props(self):
         self.assertEqual(SearchableRepositoryInterface.sortable_fields, [])
@@ -298,7 +298,7 @@ class InMemoryRepositoryUnitTests(unittest.TestCase):
 
     def test_find_all_method(self):
         entity = EntityStub()
-        self.repo.create(entity)
+        self.repo.insert(entity)
         # Test without change source entity state
         self.assertEqual(self.repo.find_all(), [entity])
         # Change source entity state without updating repository
@@ -307,14 +307,14 @@ class InMemoryRepositoryUnitTests(unittest.TestCase):
 
     def test_create_entity_method(self):
         entity = EntityStub()
-        self.repo.create(entity)
+        self.repo.insert(entity)
         self.assertEqual(self.repo.find_all()[0], entity)
 
     def test_already_exists_exception_in_create_entity(self):
-        self.repo.create(EntityStub())
+        self.repo.insert(EntityStub())
         entity = self.repo.find_all()[0]
         with self.assertRaises(Exception) as assert_error:
-            self.repo.create(entity)
+            self.repo.insert(entity)
         self.assertEqual(
             assert_error.exception.args[0],
             f"Entity already exists using ID: {entity.id}"
@@ -322,7 +322,7 @@ class InMemoryRepositoryUnitTests(unittest.TestCase):
 
     def test_find_by_id_method(self):
         entity = EntityStub()
-        self.repo.create(entity)
+        self.repo.insert(entity)
         # Test without change source entity state
         found = self.repo.find_by_id(entity.unique_entity_id)
         self.assertEqual(found, entity)
@@ -343,7 +343,7 @@ class InMemoryRepositoryUnitTests(unittest.TestCase):
 
     def test_update_method(self):
         entity = EntityStub()
-        self.repo.create(entity)
+        self.repo.insert(entity)
         # Test without change source entity state
         found = self.repo.find_by_id(entity.id)
         self.assertEqual(entity, found)
@@ -368,7 +368,7 @@ class InMemoryRepositoryUnitTests(unittest.TestCase):
 
     def test_delete_method(self):
         entity = EntityStub()
-        self.repo.create(entity)
+        self.repo.insert(entity)
         found = self.repo.find_by_id(entity.id)
         self.assertEqual(entity, found)
         self.repo.delete(entity.id)
@@ -378,7 +378,7 @@ class InMemoryRepositoryUnitTests(unittest.TestCase):
             assert_error.exception.args[0],
             f"Entity not found using ID: {entity.id}"
         )
-        self.repo.create(entity)
+        self.repo.insert(entity)
         self.repo.delete(entity.unique_entity_id)
         with self.assertRaises(Exception) as assert_error:
             self.repo.find_by_id(entity.unique_entity_id)

@@ -21,7 +21,7 @@ class RepositoryInterface(Generic[T], ABC):
     def find_by_id(self, id_: str | UniqueEntityId) -> T: ...
 
     @abc.abstractmethod
-    def create(self, entity: T) -> None: ...
+    def insert(self, entity: T) -> None: ...
 
     @abc.abstractmethod
     def update(self, entity: T) -> None: ...
@@ -145,7 +145,7 @@ class InMemoryRepository(Generic[T], RepositoryInterface[T]):
         else:
             return copy.copy(entity)
 
-    def create(self, entity: T) -> None:
+    def insert(self, entity: T) -> None:
         found = next(filter(lambda e: e.id == str(entity.id), self._items), None)
         if found is None:
             self._items.append(copy.copy(entity))
