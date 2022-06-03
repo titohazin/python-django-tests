@@ -63,12 +63,12 @@ class SearchParams(Generic[Filter]):
         self.__normalize_filter()
 
     def __normalize_page(self):
-        default = self.__get_dataclass_field('page').default
+        default = self.__get_field('page').default
         page = self.__convert_value_to_int(self.page, default)
         self.page = default if page < 1 else page
 
     def __normalize_per_page(self):
-        default = self.__get_dataclass_field('per_page').default
+        default = self.__get_field('per_page').default
         per_page = self.__convert_value_to_int(self.per_page, default)
         self.per_page = default if per_page < 1 else per_page
 
@@ -96,7 +96,7 @@ class SearchParams(Generic[Filter]):
         except (ValueError, TypeError):
             return default
 
-    def __get_dataclass_field(self, field_name: str) -> Any:
+    def __get_field(self, field_name: str) -> Any:
         return SearchParams.__dataclass_fields__[field_name]
 
 

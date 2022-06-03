@@ -1,7 +1,7 @@
 from abc import ABC
-from dataclasses import dataclass, field, asdict
+from dataclasses import Field, dataclass, field, asdict
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 from .value_objects import UniqueEntityId
 
@@ -51,3 +51,11 @@ class GenericEntity(ABC):
 
     def __refresh_updated_at(self):
         object.__setattr__(self, 'updated_at', datetime.now())
+
+    @classmethod
+    def get_field(cls, field_name: str) -> Field:
+        return cls.__dataclass_fields__[field_name]
+
+    @classmethod
+    def get_field_default(cls, field_name: str) -> Any:
+        return cls.__dataclass_fields__[field_name].default

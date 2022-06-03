@@ -1,6 +1,5 @@
 import copy
 import random
-from random import shuffle
 import unittest
 
 from django.conf import settings
@@ -53,7 +52,7 @@ class CategorySearchableInMemoryRepositoryUnitTests(unittest.TestCase):
         categories_source = [Category(
             name=f"cat_{i}", description=f"desc_{i}") for i in variation]
         categories_copy = copy.copy(categories_source)
-        shuffle(categories_copy)
+        random.shuffle(categories_copy)
         categories_sorted = self.repo._apply_sort(categories_copy)
         self.assertEqual(categories_sorted, categories_source)
         categories_sorted = self.repo._apply_sort(categories_copy, None)
