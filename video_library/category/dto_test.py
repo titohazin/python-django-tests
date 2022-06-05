@@ -3,6 +3,8 @@ import unittest
 
 from django.conf import settings
 
+from .use_cases import CreateCategoryUseCase, GetCategoryUseCase
+
 
 from .entities import Category
 from .dto import CategoryOutput, CategoryOutputMapper
@@ -24,12 +26,34 @@ class CategoryOutputUnitTests(unittest.TestCase):
         )
 
 
+class CategoryOutputStub(CategoryOutput):
+    pass
+
+
 class CategoryOutputMapperUnitTests(unittest.TestCase):
 
     def setUp(self) -> None:
         # Required configuration for integration tests (Django)
         if not settings.configured:
             settings.configure(USE_I18N=False)
+
+    def test_from_child(self):
+        mapper = CategoryOutputMapper.from_child(CategoryOutputStub)
+        self.assertIsInstance(
+            mapper.to_output(Category(name='foobar')),
+            CategoryOutputStub
+        )
+        self.assertTrue(issubclass(
+            mapper._CategoryOutputMapper__child, CategoryOutput))
+
+    def test_from_default_child(self):
+        mapper = CategoryOutputMapper.from_default_child()
+        self.assertIsInstance(
+            mapper.to_output(Category(name='foobar')),
+            CategoryOutput
+        )
+        self.assertTrue(issubclass(
+            mapper._CategoryOutputMapper__child, CategoryOutput))
 
     def test_if_convert_category_to_output(self):
         new_category = Category(name='foobar')
