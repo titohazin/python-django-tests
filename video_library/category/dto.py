@@ -1,5 +1,8 @@
 from dataclasses import dataclass
 import datetime
+from typing import Optional, TypeVar
+
+from .entities import Category
 
 
 @dataclass(slots=True, frozen=True)
@@ -12,10 +15,24 @@ class CategoryOutput:
     updated_at: datetime
 
 
+Output = TypeVar('Output', bound=CategoryOutput)
+
+
+@dataclass(slots=True, frozen=True)
 class CategoryOutputMapper:
+
+    __child: Optional[Output] = CategoryOutput
+
     @staticmethod
-    def to_output(category) -> CategoryOutput:
-        return CategoryOutput(
+    def from_child(child: Output) -> 'CategoryOutputMapper':
+        return CategoryOutputMapper(child)
+
+    @staticmethod
+    def from_default_child() -> 'CategoryOutputMapper':
+        return CategoryOutputMapper()
+
+    def to_output(self, category: Category) -> CategoryOutput:
+        return self.__child(
             id_=category.id,
             name=category.name,
             description=category.description,

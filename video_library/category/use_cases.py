@@ -27,7 +27,9 @@ class CreateCategoryUseCase(GenericUseCase):
         return self.__to_output(new_category)
 
     def __to_output(self, category: Category) -> 'Output':
-        return CategoryOutputMapper.to_output(category)
+        return CategoryOutputMapper\
+            .from_child(CreateCategoryUseCase.Output)\
+            .to_output(category)
 
     @dataclass(slots=True, frozen=True)
     class Input:
@@ -53,7 +55,9 @@ class GetCategoryUseCase(GenericUseCase):
         return self.__to_output(found_category)
 
     def __to_output(self, category: Category) -> 'Output':
-        return CategoryOutputMapper.to_output(category)
+        return CategoryOutputMapper\
+            .from_child(GetCategoryUseCase.Output)\
+            .to_output(category)
 
     @dataclass(slots=True, frozen=True)
     class Input:
@@ -78,7 +82,9 @@ class ListCategoryUseCase(GenericUseCase):
         return self.__to_output(result)
 
     def __to_output(self, result: CategoryRepository.SearchResult) -> 'Output':
-        items = list(map(CategoryOutputMapper.to_output, result.items))
+        items = list(map(
+            CategoryOutputMapper.from_default_child().to_output, result.items)
+        )
         return SearchOutputMapper\
             .from_child(ListCategoryUseCase.Output)\
             .to_output(items, result)

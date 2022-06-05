@@ -57,7 +57,9 @@ class CreateCategoryUseCaseUnitTests(unittest.TestCase):
         with patch.object(self.repo, 'insert', wraps=self.repo.insert) as mock_create:
             input_ = CreateCategoryUseCase.Input(name='foobar')
             output_ = self.create_category(input_)
-            self.assertEqual(output_, CategoryOutputMapper.to_output(
+            self.assertEqual(
+                output_,
+                CategoryOutputMapper.from_child(CreateCategoryUseCase.Output).to_output(
                     Category(
                         name='foobar',
                         unique_entity_id=self.repo._items[0].id,
@@ -72,7 +74,7 @@ class CreateCategoryUseCaseUnitTests(unittest.TestCase):
         output_ = self.create_category._CreateCategoryUseCase__to_output(category)
         self.assertEqual(
             output_,
-            CategoryOutput(
+            CreateCategoryUseCase.Output(
                 id_=category.id,
                 name=category.name,
                 description=category.description,
@@ -113,7 +115,9 @@ class GetCategoryUseCaseUnitTests(unittest.TestCase):
         with patch.object(self.repo, 'find_by_id', wraps=self.repo.find_by_id) as mock_find_by_id:
             input_ = GetCategoryUseCase.Input(new_category.id)
             output_ = self.get_category(input_)
-            self.assertEqual(output_, CategoryOutputMapper.to_output(new_category))
+            self.assertEqual(
+                output_,
+                CategoryOutputMapper.from_child(GetCategoryUseCase.Output).to_output(new_category))
         mock_find_by_id.assert_called_once()
 
     def test_throw_exception_if_category_not_found(self):
@@ -126,7 +130,7 @@ class GetCategoryUseCaseUnitTests(unittest.TestCase):
         output_ = self.get_category._GetCategoryUseCase__to_output(category)
         self.assertEqual(
             output_,
-            CategoryOutput(
+            GetCategoryUseCase.Output(
                 id_=category.id,
                 name=category.name,
                 description=category.description,
@@ -172,7 +176,10 @@ class ListCategoryUseCaseUnitTests(unittest.TestCase):
             self.assertEqual(
                 output_.items,
                 # As default, search() return ten categories per page (per_page=10)):
-                list(map(CategoryOutputMapper.to_output, categories_source[:10]))
+                list(map(
+                    CategoryOutputMapper.from_default_child().to_output,
+                    categories_source[:10]
+                ))
             )
         mock_search.assert_called_once()
 
@@ -189,11 +196,12 @@ class ListCategoryUseCaseUnitTests(unittest.TestCase):
             self.assertEqual(
                 output_,
                 ListCategoryUseCase.Output(
-                    items=list(map(CategoryOutputMapper.to_output, [
-                        categories_source[11],
-                        categories_source[10],
-                        categories_source[1]
-                    ])),
+                    items=list(map(
+                        CategoryOutputMapper.from_default_child().to_output, [
+                            categories_source[11],
+                            categories_source[10],
+                            categories_source[1]
+                        ])),
                     total=6,
                     current_page=2,
                     per_page=3,
@@ -217,7 +225,7 @@ class ListCategoryUseCaseUnitTests(unittest.TestCase):
         self.assertEqual(
             output_,
             ListCategoryUseCase.Output(
-                items=[CategoryOutputMapper.to_output(category)],
+                items=[CategoryOutputMapper.from_default_child().to_output(category)],
                 total=search_result.total,
                 current_page=search_result.current_page,
                 per_page=search_result.per_page,

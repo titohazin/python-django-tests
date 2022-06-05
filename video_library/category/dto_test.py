@@ -34,7 +34,7 @@ class CategoryOutputMapperUnitTests(unittest.TestCase):
     def test_if_convert_category_to_output(self):
         new_category = Category(name='foobar')
         self.assertEqual(
-            CategoryOutputMapper.to_output(new_category),
+            CategoryOutputMapper.from_default_child().to_output(new_category),
             CategoryOutput(
                 id_=new_category.id,
                 name=new_category.name,
