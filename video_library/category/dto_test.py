@@ -3,9 +3,6 @@ import unittest
 
 from django.conf import settings
 
-from .use_cases import CreateCategoryUseCase, GetCategoryUseCase
-
-
 from .entities import Category
 from .dto import CategoryOutput, CategoryOutputMapper
 
