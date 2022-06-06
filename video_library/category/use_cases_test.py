@@ -267,21 +267,23 @@ class UpdateCategoryUseCaseUnitTests(unittest.TestCase):
     def test_update_category(self):  # sourcery skip: extract-method
         new_category = Category(name='foobar')
         self.repo._items = [new_category]
-        with patch.object(self.repo, 'find_by_id', wraps=self.repo.find_by_id) as mock_find_by_id:
+        with patch.object(self.repo, 'update', wraps=self.repo.update) as mock_update:
             input_ = UpdateCategoryUseCase.Input(
                 id_=new_category.id,
                 name='foobar_updated',
                 description='foobar_updated_description'
             )
             output_ = self.update_category(input_)
-        # 2 calls because InMemoryRepository implementation for tests (purposeful)
-        self.assertEqual(mock_find_by_id.call_count, 2)
+        mock_update.assert_called_once()
         found_category = self.repo.find_by_id(new_category.id)
         self.assertNotEqual(found_category, new_category)
         self.assertEqual(output_, CategoryOutputMapper.from_child(
             UpdateCategoryUseCase.Output).to_output(found_category))
         self.assertEqual(found_category.name, 'foobar_updated')
-        self.assertEqual(found_category.description, 'foobar_updated_description')
+        with patch.object(self.repo, 'find_by_id', wraps=self.repo.find_by_id) as mock_find_by_id:
+            self.update_category(input_)
+            # 2 calls because InMemoryRepository implementation for tests (purposeful)
+            self.assertEqual(mock_find_by_id.call_count, 2)
 
     def test_throw_exception_if_category_not_found(self):
         with self.assertRaises(EntityNotFoundException):
@@ -330,9 +332,16 @@ class DeleteCategoryUseCaseUnitTests(unittest.TestCase):
         self.repo._items = [new_category]
         found_category = self.repo.find_by_id(new_category.id)
         self.assertEqual(found_category, new_category)
-        with patch.object(self.repo, 'find_by_id', wraps=self.repo.find_by_id) as mock_find_by_id:
-            input_ = DeleteCategoryUseCase.Input(id_=new_category.id)
+        input_ = DeleteCategoryUseCase.Input(id_=new_category.id)
+        with patch.object(self.repo, 'delete', wraps=self.repo.delete) as mock_delete:
             self.delete_category(input_)
-        mock_find_by_id.assert_called_once()
-        with self.assertRaises(EntityNotFoundException):
-            self.repo.find_by_id(new_category.id)
+            self.assertEqual(self.repo.find_all(), [])
+            with self.assertRaises(EntityNotFoundException):
+                self.repo.find_by_id(new_category.id)
+            self.assertEqual(len(self.repo._items), 1)
+            self.assertFalse(self.repo._items[0].is_active)
+            mock_delete.assert_called_once()
+        with patch.object(self.repo, 'find_by_id', wraps=self.repo.find_by_id) as mock_find_by_id:
+            self.repo._items = [new_category]
+            self.delete_category(input_)
+            mock_find_by_id.assert_called_once()
