@@ -19,7 +19,8 @@ class FieldsValidatorInterface(ABC, Generic[T]):
     validated_data: T = None
 
     @abc.abstractmethod
-    def validate(self, data: Any) -> bool: ...
+    def validate(self, data: Any) -> bool:
+        ...
 
 
 class DRFFieldsValidator(FieldsValidatorInterface[T], ABC):

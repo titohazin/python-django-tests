@@ -10,5 +10,5 @@ class UseCaseTests(unittest.TestCase):
             GenericUseCase()
         self.assertEqual(
             assert_error.exception.args[0],
-            "Can't instantiate abstract class GenericUseCase " +
+            "Can't instantiate abstract class GenericUseCase " +  # noqa: W504
             "with abstract method __call__")

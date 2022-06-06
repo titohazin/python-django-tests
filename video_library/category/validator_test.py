@@ -96,8 +96,8 @@ class CategoryValidatorUnitTest(unittest.TestCase):
     def test_invalid_cases_for_is_active_field(self):
         test_data = [
             {'is_active': None}, {'is_active': 'foobar'},
-            {'is_active': 0},  {'is_active': 1},
-            {'is_active': '0'},  {'is_active': '1'},
+            {'is_active': 0}, {'is_active': 1},
+            {'is_active': '0'}, {'is_active': '1'},
             {'is_active': 9}, {'is_active': {}}, {'is_active': []}
         ]
         for data in test_data:

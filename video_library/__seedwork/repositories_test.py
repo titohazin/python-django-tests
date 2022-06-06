@@ -26,7 +26,7 @@ class RepositoryInterfaceUnitTests(unittest.TestCase):
             RepositoryInterface()
         self.assertEqual(
             assert_error.exception.args[0],
-            "Can't instantiate abstract class RepositoryInterface " +
+            "Can't instantiate abstract class RepositoryInterface " +  # noqa: W504
             "with abstract methods delete, find_all, find_by_id, insert, update")
 
 
@@ -37,8 +37,8 @@ class SearchableRepositoryInterfaceUnitTests(unittest.TestCase):
             SearchableRepositoryInterface()
         self.assertEqual(
             assert_error.exception.args[0],
-            "Can't instantiate abstract class SearchableRepositoryInterface with " +
-            "abstract methods delete, find_all, find_by_id, insert, search, update")
+            "Can't instantiate abstract class SearchableRepositoryInterface " +  # noqa: W504
+            "with abstract methods delete, find_all, find_by_id, insert, search, update")
 
     def test_sortable_fields_props(self):
         self.assertEqual(SearchableRepositoryInterface.sortable_fields, [])
@@ -402,8 +402,10 @@ class InMemorySearchableRepositoryStub(InMemorySearchableRepository[EntityStub, 
 
     def _apply_filter(self, items: List[EntityStub], filter_: str | None) -> List[EntityStub]:
         if filter_:
-            filtered = filter(lambda item: filter_.lower() in item.foo.lower()
-                              or filter_ == str(item.bar), items)
+            filtered = filter(
+                lambda item: filter_.lower() in item.foo.lower() or filter_ == str(item.bar),
+                items
+            )
             return list(filtered)
         return items
 
@@ -416,7 +418,7 @@ class InMemorySearchableRepositoryUnitTests(unittest.TestCase):
         self.repo = InMemorySearchableRepositoryStub()
 
     def test_apply_filter(self):
-        items = [EntityStub(foo=f"foo_{i+10}", bar=float(i+10)) for i in range(50)]
+        items = [EntityStub(foo=f"foo_{i+10}", bar=float(i + 10)) for i in range(50)]
         filtered_items = self.repo._apply_filter(items, None)
         self.assertEqual(filtered_items, items)
         filtered_items = self.repo._apply_filter(items, 'foo_1')

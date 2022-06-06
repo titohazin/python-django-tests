@@ -15,19 +15,24 @@ T = TypeVar('T', bound=GenericEntity)
 class RepositoryInterface(Generic[T], ABC):
 
     @abc.abstractmethod
-    def find_all(self) -> List[T]: ...
+    def find_all(self) -> List[T]:
+        ...
 
     @abc.abstractmethod
-    def find_by_id(self, id_: str | UniqueEntityId) -> T: ...
+    def find_by_id(self, id_: str | UniqueEntityId) -> T:
+        ...
 
     @abc.abstractmethod
-    def insert(self, entity: T) -> None: ...
+    def insert(self, entity: T) -> None:
+        ...
 
     @abc.abstractmethod
-    def update(self, entity: T) -> None: ...
+    def update(self, entity: T) -> None:
+        ...
 
     @abc.abstractmethod
-    def delete(self, id_: str | UniqueEntityId) -> None: ...
+    def delete(self, id_: str | UniqueEntityId) -> None:
+        ...
 
 
 Input = TypeVar('Input')
@@ -39,7 +44,8 @@ class SearchableRepositoryInterface(Generic[T, Input, Output], RepositoryInterfa
     sortable_fields: List[str] = []
 
     @abc.abstractmethod
-    def search(self, input_: Input) -> Output: ...
+    def search(self, input_: Input) -> Output:
+        ...
 
 
 # sourcery skip: avoid-builtin-shadow
@@ -186,9 +192,15 @@ class InMemorySearchableRepository(
         )
 
     @abc.abstractmethod
-    def _apply_filter(self, items: List[T], filter: Filter | None) -> List[T]: ...
+    def _apply_filter(self, items: List[T], filter: Filter | None) -> List[T]:
+        ...
 
-    def _apply_sort(self, items: List[T], sort_by: str | None, sort_dir: str | None = None) -> List[T]:
+    def _apply_sort(
+        self,
+        items: List[T],
+        sort_by: str | None,
+        sort_dir: str | None = None
+    ) -> List[T]:
         if sort_by and sort_by in self.sortable_fields:
             is_reverse = sort_dir == 'desc'
             key = (lambda i: getattr(i, sort_by).lower() if isinstance(

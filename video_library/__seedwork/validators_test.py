@@ -20,7 +20,7 @@ class ValidatorFieldsInterfaceUnitTests(unittest.TestCase):
     def test_if_validate_method_is_abstract(self):
         with self.assertRaises(TypeError) as assert_error:
             FieldsValidatorInterface().validate()
-        self.assertEqual(assert_error.exception.args[0], "Can't instantiate " +
+        self.assertEqual(assert_error.exception.args[0], "Can't instantiate " +  # noqa: W504
                          "abstract class FieldsValidatorInterface with abstract method validate")
 
     def test_if_errors_field_meets_specifications(self):

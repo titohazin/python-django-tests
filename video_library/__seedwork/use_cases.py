@@ -9,4 +9,5 @@ Output = TypeVar('Output')
 class GenericUseCase(Generic[Input, Output], ABC):
 
     @abc.abstractmethod
-    def __call__(self, input_: 'Input') -> 'Output': ...
+    def __call__(self, input_: 'Input') -> 'Output':
+        ...

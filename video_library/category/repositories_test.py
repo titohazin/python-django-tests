@@ -12,7 +12,7 @@ class CategoryRepositoryUnitTests(unittest.TestCase):
             CategoryRepository()
         self.assertEqual(
             assert_error.exception.args[0],
-            "Can't instantiate abstract class CategoryRepository with " +
+            "Can't instantiate abstract class CategoryRepository with " +  # noqa: W504
             "abstract methods delete, find_all, find_by_id, insert, search, update")
 
     def test_if_search_params_implements_default_search_params(self):

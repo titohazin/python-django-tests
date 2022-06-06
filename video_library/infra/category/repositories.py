@@ -25,7 +25,8 @@ class CategoryInMemoryRepository(CategoryRepository, InMemorySearchableRepositor
         self, items: List[Category],
         sort_by: str | None = None, sort_dir: str | None = None
     ) -> List[Category]:
-        sort_by = 'created_at' if sort_by is None or sort_by not in self.sortable_fields else sort_by
+        sort_by = 'created_at' if sort_by is None or\
+            sort_by not in self.sortable_fields else sort_by
         return super()._apply_sort(items, sort_by, sort_dir)
 
 
