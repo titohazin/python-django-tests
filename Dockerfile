@@ -8,7 +8,7 @@ RUN apt install -y --no-install-recommends default-jre
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
 # Python Package Manager
-RUN pip install pdm>=1.15.0
+RUN pip install pdm>=1.15.2
 
 # Add non-root user
 RUN useradd -ms /bin/bash python
