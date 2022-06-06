@@ -141,11 +141,11 @@ class InMemoryRepository(Generic[T], RepositoryInterface[T]):
     _items: List[T] = field(default_factory=lambda: [])
 
     def find_all(self) -> List[T]:
-        return copy.copy(self._items)
+        return copy.copy(list(filter(lambda e: e.is_active, self._items)))
 
     def find_by_id(self, id_: str | UniqueEntityId) -> T:
         entity = next(filter(lambda e: e.id == str(id_), self._items), None)
-        if entity is None:
+        if entity is None or entity.is_active is False:
             raise EntityNotFoundException(
                 f'Entity not found using ID: {id_}')
         else:
@@ -165,7 +165,10 @@ class InMemoryRepository(Generic[T], RepositoryInterface[T]):
         self._items[found_index] = copy.copy(entity)
 
     def delete(self, id_: str | UniqueEntityId) -> None:
-        self._items.remove(self.find_by_id(id_))
+        found = self.find_by_id(id_)
+        found_index = self._items.index(found)
+        found.deactivate()
+        self._items[found_index] = copy.copy(found)
 
 
 class InMemorySearchableRepository(
@@ -177,7 +180,7 @@ class InMemorySearchableRepository(
 
     def search(self, input_: SearchParams[Filter]) -> SearchResult[T, Filter]:
 
-        items_filtered = self._apply_filter(self._items, input_.filter_)
+        items_filtered = self._apply_filter(self.find_all(), input_.filter_)
         items_sorted = self._apply_sort(items_filtered, input_.sort_by, input_.sort_dir)
         items_paginated = self._apply_pagination(items_sorted, input_.page, input_.per_page)
 

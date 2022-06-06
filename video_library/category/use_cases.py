@@ -96,3 +96,49 @@ class ListCategoryUseCase(GenericUseCase):
     @dataclass(slots=True, frozen=True)
     class Output(SearchOutput[CategoryOutput]):
         pass
+
+
+@dataclass(slots=True, frozen=True)
+class UpdateCategoryUseCase(GenericUseCase):
+
+    __repo: CategoryRepository
+
+    def __init__(self, repo: CategoryRepository):
+        object.__setattr__(self, '_UpdateCategoryUseCase__repo', repo)
+
+    def __call__(self, input_: 'Input') -> 'Output':
+        category = self.__repo.find_by_id(input_.id_)
+        category.update(input_.name, input_.description)
+        self.__repo.update(category)
+        return self.__to_output(category)
+
+    def __to_output(self, category: Category) -> 'Output':
+        return CategoryOutputMapper\
+            .from_child(UpdateCategoryUseCase.Output)\
+            .to_output(category)
+
+    @dataclass(slots=True, frozen=True)
+    class Input:
+        id_: str
+        name: str
+        description: Optional[str] = Category.get_field_default('description')
+
+    @dataclass(slots=True, frozen=True)
+    class Output(CategoryOutput):
+        pass
+
+
+@dataclass(slots=True, frozen=True)
+class DeleteCategoryUseCase(GenericUseCase):
+
+    __repo: CategoryRepository
+
+    def __init__(self, repo: CategoryRepository):
+        object.__setattr__(self, '_DeleteCategoryUseCase__repo', repo)
+
+    def __call__(self, input_: 'Input') -> None:
+        self.__repo.delete(input_.id_)
+
+    @dataclass(slots=True, frozen=True)
+    class Input:
+        id_: str

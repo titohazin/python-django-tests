@@ -11,7 +11,13 @@ from __seedwork.exceptions import EntityNotFoundException
 from __seedwork.use_cases import GenericUseCase
 from __seedwork.dto import SearchInput, SearchOutput
 
-from .use_cases import CreateCategoryUseCase, GetCategoryUseCase, ListCategoryUseCase
+from .use_cases import (
+    CreateCategoryUseCase,
+    GetCategoryUseCase,
+    ListCategoryUseCase,
+    UpdateCategoryUseCase,
+    DeleteCategoryUseCase
+)
 from .repositories import CategoryRepository
 from .entities import Category
 from .dto import CategoryOutput, CategoryOutputMapper
@@ -232,3 +238,101 @@ class ListCategoryUseCaseUnitTests(unittest.TestCase):
                 last_page=search_result.last_page
             )
         )
+
+
+class UpdateCategoryUseCaseUnitTests(unittest.TestCase):
+
+    repo: CategoryInMemoryRepository
+    update_category: UpdateCategoryUseCase
+
+    def setUp(self) -> None:
+        # Required configuration for integration tests (Django)
+        if not settings.configured:
+            settings.configure(USE_I18N=False)
+        self.repo = CategoryRepositoryFactory.instance()
+        self.update_category = UpdateCategoryUseCase(self.repo)
+
+    def test_if_implements_generic_use_case(self):
+        self.assertIsInstance(self.update_category, GenericUseCase)
+
+    def test_input_inner_class(self):
+        self.assertEqual(
+            UpdateCategoryUseCase.Input.__annotations__,
+            {'id_': str, 'name': str, 'description': Optional[str]}
+        )
+
+    def test_if_output_inner_class_is_category_output_subclass(self):
+        self.assertTrue(issubclass(UpdateCategoryUseCase.Output, CategoryOutput))
+
+    def test_update_category(self):  # sourcery skip: extract-method
+        new_category = Category(name='foobar')
+        self.repo._items = [new_category]
+        with patch.object(self.repo, 'find_by_id', wraps=self.repo.find_by_id) as mock_find_by_id:
+            input_ = UpdateCategoryUseCase.Input(
+                id_=new_category.id,
+                name='foobar_updated',
+                description='foobar_updated_description'
+            )
+            output_ = self.update_category(input_)
+        # 2 calls because InMemoryRepository implementation for tests (purposeful)
+        self.assertEqual(mock_find_by_id.call_count, 2)
+        found_category = self.repo.find_by_id(new_category.id)
+        self.assertNotEqual(found_category, new_category)
+        self.assertEqual(output_, CategoryOutputMapper.from_child(
+            UpdateCategoryUseCase.Output).to_output(found_category))
+        self.assertEqual(found_category.name, 'foobar_updated')
+        self.assertEqual(found_category.description, 'foobar_updated_description')
+
+    def test_throw_exception_if_category_not_found(self):
+        with self.assertRaises(EntityNotFoundException):
+            input_ = UpdateCategoryUseCase.Input(id_='fake_id', name='foobar')
+            self.update_category(input_)
+
+    def test__to_output_private_method(self):
+        category = Category(name='foobar')
+        output_ = self.update_category._UpdateCategoryUseCase__to_output(category)
+        self.assertEqual(
+            output_,
+            UpdateCategoryUseCase.Output(
+                id_=category.id,
+                name=category.name,
+                description=category.description,
+                is_active=category.is_active,
+                created_at=category.created_at,
+                updated_at=category.updated_at
+            )
+        )
+
+
+class DeleteCategoryUseCaseUnitTests(unittest.TestCase):
+
+    repo: CategoryInMemoryRepository
+    delete_category: DeleteCategoryUseCase
+
+    def setUp(self) -> None:
+        # Required configuration for integration tests (Django)
+        if not settings.configured:
+            settings.configure(USE_I18N=False)
+        self.repo = CategoryRepositoryFactory.instance()
+        self.delete_category = DeleteCategoryUseCase(self.repo)
+
+    def test_if_implements_generic_use_case(self):
+        self.assertIsInstance(self.delete_category, GenericUseCase)
+
+    def test_input_inner_class(self):
+        self.assertEqual(
+            DeleteCategoryUseCase.Input.__annotations__,
+            {'id_': str}
+        )
+
+    def test_delete_category(self):  # sourcery skip: extract-method
+        new_category = Category(name='foobar')
+        self.repo._items = [new_category]
+        found_category = self.repo.find_by_id(new_category.id)
+        self.assertEqual(found_category, new_category)
+        with patch.object(self.repo, 'find_by_id', wraps=self.repo.find_by_id) as mock_find_by_id:
+            input_ = DeleteCategoryUseCase.Input(id_=new_category.id)
+            self.delete_category(input_)
+        mock_find_by_id.assert_called_once()
+        with self.assertRaises(EntityNotFoundException):
+            self.repo.find_by_id(new_category.id)

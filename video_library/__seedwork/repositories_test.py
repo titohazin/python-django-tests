@@ -296,19 +296,21 @@ class InMemoryRepositoryUnitTests(unittest.TestCase):
         entities = self.repo._items
         self.assertEqual(entities, [])
 
-    def test_find_all_method(self):
+    def test_create_entity_method(self):
         entity = EntityStub()
         self.repo.insert(entity)
+        self.assertEqual(self.repo.find_all()[0], entity)
+
+    def test_find_all_method(self):
+        entity = EntityStub()
+        inactive_entity = EntityStub(is_active=False)
+        self.repo.insert(entity)
+        self.repo.insert(inactive_entity)
         # Test without change source entity state
         self.assertEqual(self.repo.find_all(), [entity])
         # Change source entity state without updating repository
         entity.update(foo="other value")  # NOSONAR
         self.assertNotEqual(self.repo.find_all(), [entity])
-
-    def test_create_entity_method(self):
-        entity = EntityStub()
-        self.repo.insert(entity)
-        self.assertEqual(self.repo.find_all()[0], entity)
 
     def test_already_exists_exception_in_create_entity(self):
         self.repo.insert(EntityStub())
@@ -340,6 +342,14 @@ class InMemoryRepositoryUnitTests(unittest.TestCase):
             assert_error.exception.args[0],
             "Entity not found using ID: fake id"
         )
+        inactive_entity = EntityStub(is_active=False)
+        self.repo.insert(inactive_entity)
+        with self.assertRaises(Exception) as assert_error:
+            self.repo.find_by_id(inactive_entity.id)
+        self.assertEqual(
+            assert_error.exception.args[0],
+            f"Entity not found using ID: {inactive_entity.id}"
+        )
 
     def test_update_method(self):
         entity = EntityStub()
@@ -365,6 +375,14 @@ class InMemoryRepositoryUnitTests(unittest.TestCase):
             assert_error.exception.args[0],
             f"Entity not found using ID: {entity.id}"
         )
+        inactive_entity = EntityStub(is_active=False)
+        self.repo.insert(inactive_entity)
+        with self.assertRaises(Exception) as assert_error:
+            self.repo.update(inactive_entity)
+        self.assertEqual(
+            assert_error.exception.args[0],
+            f"Entity not found using ID: {inactive_entity.id}"
+        )
 
     def test_delete_method(self):
         entity = EntityStub()
@@ -378,6 +396,7 @@ class InMemoryRepositoryUnitTests(unittest.TestCase):
             assert_error.exception.args[0],
             f"Entity not found using ID: {entity.id}"
         )
+        entity = EntityStub()
         self.repo.insert(entity)
         self.repo.delete(entity.unique_entity_id)
         with self.assertRaises(Exception) as assert_error:
@@ -393,6 +412,14 @@ class InMemoryRepositoryUnitTests(unittest.TestCase):
         self.assertEqual(
             assert_error.exception.args[0],
             "Entity not found using ID: fake id"
+        )
+        inactive_entity = EntityStub(is_active=False)
+        self.repo.insert(inactive_entity)
+        with self.assertRaises(Exception) as assert_error:
+            self.repo.delete(inactive_entity.id)
+        self.assertEqual(
+            assert_error.exception.args[0],
+            f"Entity not found using ID: {inactive_entity.id}"
         )
 
 
@@ -488,6 +515,13 @@ class InMemorySearchableRepositoryUnitTests(unittest.TestCase):
             filter_=None
         ))
         self.assertEqual(result.last_page, 3)
+
+    def test_search_when_has_inactive_items(self):
+        items = [EntityStub(foo=f"foo_{i}", bar=float(i)) for i in range(3)]
+        items.append(EntityStub(is_active=False))
+        self.repo._items = items
+        result = self.repo.search(SearchParams())
+        self.assertEqual(result.items, items[:3])
 
     def test_search_applying_filter_and_pagination(self):
         items = self.repo._items = [
