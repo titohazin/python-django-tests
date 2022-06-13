@@ -5,22 +5,18 @@ from dataclasses import dataclass, field
 import math
 from typing import Any, List, Optional, TypeVar, Generic
 
+from .exceptions import EntityAlreadyExistsException, EntityNotFoundException
 from .value_objects import UniqueEntityId
 from .entities import GenericEntity
-from .exceptions import EntityAlreadyExistsException, EntityNotFoundException
 
 T = TypeVar('T', bound=GenericEntity)
+Input = TypeVar('Input')
+Output = TypeVar('Output')
 
 
-class RepositoryInterface(Generic[T], ABC):
+class RepositoryInterface(Generic[T, Input, Output], ABC):
 
-    @abc.abstractmethod
-    def find_all(self) -> List[T]:
-        ...
-
-    @abc.abstractmethod
-    def find_by_id(self, id_: str | UniqueEntityId) -> T:
-        ...
+    sortable_fields: List[str] = []
 
     @abc.abstractmethod
     def insert(self, entity: T) -> None:
@@ -34,14 +30,13 @@ class RepositoryInterface(Generic[T], ABC):
     def delete(self, id_: str | UniqueEntityId) -> None:
         ...
 
+    @abc.abstractmethod
+    def find_by_id(self, id_: str | UniqueEntityId) -> T:
+        ...
 
-Input = TypeVar('Input')
-Output = TypeVar('Output')
-
-
-class SearchableRepositoryInterface(Generic[T, Input, Output], RepositoryInterface[T], ABC):
-
-    sortable_fields: List[str] = []
+    @abc.abstractmethod
+    def find_all(self) -> List[T]:
+        ...
 
     @abc.abstractmethod
     def search(self, input_: Input) -> Output:
@@ -136,20 +131,14 @@ class SearchResult(Generic[T, Filter]):
 
 
 @dataclass(slots=True)
-class InMemoryRepository(Generic[T], RepositoryInterface[T]):
+class InMemoryRepository(
+        Generic[T, Filter],
+        RepositoryInterface[
+            T, SearchParams[Filter], SearchResult[T, Filter]
+        ],
+        ABC):
 
     _items: List[T] = field(default_factory=lambda: [])
-
-    def find_all(self) -> List[T]:
-        return copy.copy(list(filter(lambda e: e.is_active, self._items)))
-
-    def find_by_id(self, id_: str | UniqueEntityId) -> T:
-        entity = next(filter(lambda e: e.id == str(id_), self._items), None)
-        if entity is None or entity.is_active is False:
-            raise EntityNotFoundException(
-                f'Entity not found using ID: {id_}')
-        else:
-            return copy.copy(entity)
 
     def insert(self, entity: T) -> None:
         found = next(filter(lambda e: e.id == str(entity.id), self._items), None)
@@ -170,19 +159,24 @@ class InMemoryRepository(Generic[T], RepositoryInterface[T]):
         found.deactivate()
         self._items[found_index] = copy.copy(found)
 
+    def find_by_id(self, id_: str | UniqueEntityId) -> T:
+        entity = next(filter(lambda e: e.id == str(id_), self._items), None)
+        if entity is None or entity.is_active is False:
+            raise EntityNotFoundException(
+                f'Entity not found using ID: {id_}')
+        else:
+            return copy.copy(entity)
 
-class InMemorySearchableRepository(
-    Generic[T, Filter],
-    InMemoryRepository[T],
-    SearchableRepositoryInterface[T, SearchParams[Filter], SearchResult[T, Filter]],
-    ABC
-):
+    def find_all(self) -> List[T]:
+        return copy.copy(list(filter(lambda e: e.is_active, self._items)))
 
     def search(self, input_: SearchParams[Filter]) -> SearchResult[T, Filter]:
 
         items_filtered = self._apply_filter(self.find_all(), input_.filter_)
-        items_sorted = self._apply_sort(items_filtered, input_.sort_by, input_.sort_dir)
-        items_paginated = self._apply_pagination(items_sorted, input_.page, input_.per_page)
+        items_sorted = self._apply_sort(
+            items_filtered, input_.sort_by, input_.sort_dir)
+        items_paginated = self._apply_pagination(
+            items_sorted, input_.page, input_.per_page)
 
         return SearchResult(
             items=items_paginated,

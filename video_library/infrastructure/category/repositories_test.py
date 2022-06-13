@@ -4,9 +4,10 @@ import unittest
 
 from django.conf import settings
 
-from .repositories import CategoryRepositoryFactory, CategoryInMemoryRepository
-from category.repositories import CategoryRepository
-from category.entities import Category
+from domain.category.repositories import CategoryRepository
+from domain.category.entities import Category
+
+from .repositories import CategoryInMemoryRepository
 
 
 class CategorySearchableInMemoryRepositoryUnitTests(unittest.TestCase):
@@ -17,7 +18,7 @@ class CategorySearchableInMemoryRepositoryUnitTests(unittest.TestCase):
         # Required configuration for integration tests (Django)
         if not settings.configured:
             settings.configure(USE_I18N=False)
-        self.repo = CategoryRepositoryFactory.instance()
+        self.repo = CategoryInMemoryRepository()
 
     def test_if_factory_return_a_category_repository_instance(self):
         self.assertIsInstance(self.repo, CategoryRepository)

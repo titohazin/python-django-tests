@@ -10,7 +10,7 @@ from .validators import FieldsValidatorInterface, DRFFieldsValidator
 from .validators import DRFStrictCharField, DRFStrictBooleanField
 
 
-class ValidatorFieldsInterfaceUnitTests(unittest.TestCase):
+class FieldsValidatorInterfaceUnitTests(unittest.TestCase):
 
     def setUp(self):
         # Required configuration for integration tests (Django)

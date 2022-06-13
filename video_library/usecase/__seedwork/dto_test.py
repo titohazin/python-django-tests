@@ -1,8 +1,9 @@
 from typing import List, Optional
 import unittest
 
+from domain.__seedwork.repositories import Filter, SearchResult
+
 from .dto import SearchInput, SearchOutput, SearchOutputMapper, Item
-from .repositories import Filter, SearchResult
 
 
 class SearchInputUnitTests(unittest.TestCase):

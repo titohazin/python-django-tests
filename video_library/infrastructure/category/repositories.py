@@ -1,11 +1,11 @@
 from typing import List
 
-from __seedwork.repositories import InMemorySearchableRepository
-from category.repositories import CategoryRepository
-from category.entities import Category
+from domain.__seedwork.repositories import InMemoryRepository
+from domain.category.repositories import CategoryRepository
+from domain.category.entities import Category
 
 
-class CategoryInMemoryRepository(CategoryRepository, InMemorySearchableRepository):
+class CategoryInMemoryRepository(CategoryRepository, InMemoryRepository):
 
     sortable_fields: List[str] = [
         'name',
@@ -28,10 +28,3 @@ class CategoryInMemoryRepository(CategoryRepository, InMemorySearchableRepositor
         sort_by = 'created_at' if sort_by is None or\
             sort_by not in self.sortable_fields else sort_by
         return super()._apply_sort(items, sort_by, sort_dir)
-
-
-class CategoryRepositoryFactory:
-
-    @staticmethod
-    def instance():
-        return CategoryInMemoryRepository()

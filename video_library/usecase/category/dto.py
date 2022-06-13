@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import datetime
 from typing import Optional, TypeVar
 
-from .entities import Category
+from domain.category.entities import Category
 
 
 @dataclass(slots=True, frozen=True)

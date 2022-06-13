@@ -4,10 +4,11 @@ from typing import Optional, List
 import unittest
 
 from .entities import GenericEntity
-from .repositories import T, Filter
-from .repositories import RepositoryInterface, SearchableRepositoryInterface
-from .repositories import SearchParams, SearchResult
-from .repositories import InMemoryRepository, InMemorySearchableRepository
+from .repositories import (
+    RepositoryInterface, T,
+    SearchParams, SearchResult, Filter,
+    InMemoryRepository
+)
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -27,21 +28,10 @@ class RepositoryInterfaceUnitTests(unittest.TestCase):
         self.assertEqual(
             assert_error.exception.args[0],
             "Can't instantiate abstract class RepositoryInterface " +  # noqa: W504
-            "with abstract methods delete, find_all, find_by_id, insert, update")
-
-
-class SearchableRepositoryInterfaceUnitTests(unittest.TestCase):
-
-    def test_if_are_a_abstract_class_and_abstract_methods(self):
-        with self.assertRaises(TypeError) as assert_error:
-            SearchableRepositoryInterface()
-        self.assertEqual(
-            assert_error.exception.args[0],
-            "Can't instantiate abstract class SearchableRepositoryInterface " +  # noqa: W504
             "with abstract methods delete, find_all, find_by_id, insert, search, update")
 
     def test_sortable_fields_props(self):
-        self.assertEqual(SearchableRepositoryInterface.sortable_fields, [])
+        self.assertEqual(RepositoryInterface.sortable_fields, [])
 
 
 class SearchParamsUnitTests(unittest.TestCase):
@@ -285,12 +275,26 @@ class SearchResultUnitTests(unittest.TestCase):
         self.assertEqual(result.last_page, 10)
 
 
+class InMemoryRepositoryStub(InMemoryRepository[EntityStub, str]):
+
+    sortable_fields = ['foo', 'bar']
+
+    def _apply_filter(self, items: List[EntityStub], filter_: str | None) -> List[EntityStub]:
+        if filter_:
+            filtered = filter(
+                lambda item: filter_.lower() in item.foo.lower() or filter_ == str(item.bar),
+                items
+            )
+            return list(filtered)
+        return items
+
+
 class InMemoryRepositoryUnitTests(unittest.TestCase):
 
-    repo: InMemoryRepository[EntityStub]
+    repo: InMemoryRepository
 
     def setUp(self) -> None:
-        self.repo = InMemoryRepository()
+        self.repo = InMemoryRepositoryStub()
 
     def test_if_entities_list_is_empty_when_created(self):
         entities = self.repo._items
@@ -422,30 +426,9 @@ class InMemoryRepositoryUnitTests(unittest.TestCase):
             f"Entity not found using ID: {inactive_entity.id}"
         )
 
-
-class InMemorySearchableRepositoryStub(InMemorySearchableRepository[EntityStub, str]):
-
-    sortable_fields = ['foo', 'bar']
-
-    def _apply_filter(self, items: List[EntityStub], filter_: str | None) -> List[EntityStub]:
-        if filter_:
-            filtered = filter(
-                lambda item: filter_.lower() in item.foo.lower() or filter_ == str(item.bar),
-                items
-            )
-            return list(filtered)
-        return items
-
-
-class InMemorySearchableRepositoryUnitTests(unittest.TestCase):
-
-    repo: InMemorySearchableRepositoryStub
-
-    def setUp(self) -> None:
-        self.repo = InMemorySearchableRepositoryStub()
-
     def test_apply_filter(self):
-        items = [EntityStub(foo=f"foo_{i+10}", bar=float(i + 10)) for i in range(50)]
+        items = [EntityStub(foo=f"foo_{i+10}", bar=float(i + 10))
+                 for i in range(50)]
         filtered_items = self.repo._apply_filter(items, None)
         self.assertEqual(filtered_items, items)
         filtered_items = self.repo._apply_filter(items, 'foo_1')
@@ -659,7 +642,8 @@ class InMemorySearchableRepositoryUnitTests(unittest.TestCase):
         items = [EntityStub(foo=f"foo_{i}", bar=float(i)) for i in variation]
         self.repo._items = items
         comp_items = sorted(
-            list(filter(lambda i: i.foo in ['foo_11', 'foo_12', 'foo_13'], items)),
+            list(filter(lambda i: i.foo in [
+                 'foo_11', 'foo_12', 'foo_13'], items)),
             key=lambda i: i.foo,
             reverse=True
         )

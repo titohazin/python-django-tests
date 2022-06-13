@@ -5,12 +5,17 @@ from typing import Optional
 from unittest.mock import patch
 
 from django.conf import settings
-from infra.category.repositories import CategoryInMemoryRepository, CategoryRepositoryFactory
 
-from __seedwork.exceptions import EntityNotFoundException
-from __seedwork.use_cases import GenericUseCase
-from __seedwork.dto import SearchInput, SearchOutput
+from domain.__seedwork.exceptions import EntityNotFoundException
+from domain.category.entities import Category
+from infrastructure.category.repositories import (
+    CategoryInMemoryRepository, CategoryRepository
+)
 
+from usecase.__seedwork.use_cases import GenericUseCase
+from usecase.__seedwork.dto import SearchInput, SearchOutput
+
+from .dto import CategoryOutput, CategoryOutputMapper
 from .use_cases import (
     CreateCategoryUseCase,
     GetCategoryUseCase,
@@ -18,9 +23,6 @@ from .use_cases import (
     UpdateCategoryUseCase,
     DeleteCategoryUseCase
 )
-from .repositories import CategoryRepository
-from .entities import Category
-from .dto import CategoryOutput, CategoryOutputMapper
 
 
 class CreateCategoryUseCaseUnitTests(unittest.TestCase):
@@ -32,7 +34,7 @@ class CreateCategoryUseCaseUnitTests(unittest.TestCase):
         # Required configuration for integration tests (Django)
         if not settings.configured:
             settings.configure(USE_I18N=False)
-        self.repo = CategoryRepositoryFactory.instance()
+        self.repo = CategoryInMemoryRepository()
         self.create_category = CreateCategoryUseCase(self.repo)
 
     def test_if_implements_generic_use_case(self):
@@ -100,7 +102,7 @@ class GetCategoryUseCaseUnitTests(unittest.TestCase):
         # Required configuration for integration tests (Django)
         if not settings.configured:
             settings.configure(USE_I18N=False)
-        self.repo = CategoryRepositoryFactory.instance()
+        self.repo = CategoryInMemoryRepository()
         self.get_category = GetCategoryUseCase(self.repo)
 
     def test_if_implements_generic_use_case(self):
@@ -156,7 +158,7 @@ class ListCategoryUseCaseUnitTests(unittest.TestCase):
         # Required configuration for integration tests (Django)
         if not settings.configured:
             settings.configure(USE_I18N=False)
-        self.repo = CategoryRepositoryFactory.instance()
+        self.repo = CategoryInMemoryRepository()
         self.list_category = ListCategoryUseCase(self.repo)
 
     def test_if_implements_generic_use_case(self):
@@ -249,7 +251,7 @@ class UpdateCategoryUseCaseUnitTests(unittest.TestCase):
         # Required configuration for integration tests (Django)
         if not settings.configured:
             settings.configure(USE_I18N=False)
-        self.repo = CategoryRepositoryFactory.instance()
+        self.repo = CategoryInMemoryRepository()
         self.update_category = UpdateCategoryUseCase(self.repo)
 
     def test_if_implements_generic_use_case(self):
@@ -315,7 +317,7 @@ class DeleteCategoryUseCaseUnitTests(unittest.TestCase):
         # Required configuration for integration tests (Django)
         if not settings.configured:
             settings.configure(USE_I18N=False)
-        self.repo = CategoryRepositoryFactory.instance()
+        self.repo = CategoryInMemoryRepository()
         self.delete_category = DeleteCategoryUseCase(self.repo)
 
     def test_if_implements_generic_use_case(self):

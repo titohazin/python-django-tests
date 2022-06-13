@@ -4,8 +4,8 @@ from unittest.mock import patch
 import uuid
 import unittest
 
-from .value_objects import GenericValueObject, UniqueEntityId
 from .exceptions import InvalidUuidException
+from .value_objects import GenericValueObject, UniqueEntityId
 
 
 @dataclass(frozen=True, slots=True)

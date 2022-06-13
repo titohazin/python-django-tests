@@ -1,6 +1,6 @@
 import unittest
 
-from __seedwork.repositories import SearchParams, SearchResult
+from domain.__seedwork.repositories import SearchParams, SearchResult
 
 from .repositories import CategoryRepository
 

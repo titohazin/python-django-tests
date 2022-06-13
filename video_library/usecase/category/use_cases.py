@@ -1,11 +1,12 @@
 from dataclasses import asdict, dataclass
 from typing import Optional
 
-from __seedwork.use_cases import GenericUseCase
-from __seedwork.dto import SearchOutput, SearchInput, SearchOutputMapper
+from domain.category.entities import Category
+from domain.category.repositories import CategoryRepository
 
-from .entities import Category
-from .repositories import CategoryRepository
+from usecase.__seedwork.use_cases import GenericUseCase
+from usecase.__seedwork.dto import SearchOutput, SearchInput, SearchOutputMapper
+
 from .dto import CategoryOutput, CategoryOutputMapper
 
 

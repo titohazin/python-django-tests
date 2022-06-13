@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Generic, List, Optional, TypeVar
-from .repositories import Filter, SearchResult
+
+from domain.__seedwork.repositories import Filter, SearchResult
 
 
 @dataclass(slots=True, frozen=True)

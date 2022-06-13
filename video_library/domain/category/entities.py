@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from __seedwork.entities import GenericEntity
-from __seedwork.exceptions import EntityValidationException
-from .validator import CategoryValidatorFactory
+from domain.__seedwork.exceptions import EntityValidationException
+from domain.__seedwork.entities import GenericEntity
+
+from .validators import CategoryValidator
 
 
 @dataclass(kw_only=True, frozen=True, slots=True)
@@ -24,6 +25,6 @@ class Category(GenericEntity):
         self.__validate()
 
     def __validate(self):
-        validator = CategoryValidatorFactory.instance()
+        validator = CategoryValidator()
         if not validator.validate(self.to_dict()):
             raise EntityValidationException(validator.fields_errors)

@@ -1,12 +1,12 @@
 from abc import ABC
 
-from __seedwork.repositories import (
-    SearchableRepositoryInterface,
+from domain.__seedwork.repositories import (
+    RepositoryInterface,
     SearchParams as DefaultSearchParams,
     SearchResult as DefaultSearchResult,
 )
 
-from .entities import Category
+from domain.category.entities import Category
 
 
 class _SearchParams(DefaultSearchParams):
@@ -18,7 +18,7 @@ class _SearchResult(DefaultSearchResult):
 
 
 class CategoryRepository(
-    SearchableRepositoryInterface[
+    RepositoryInterface[
         Category,
         _SearchParams,
         _SearchResult

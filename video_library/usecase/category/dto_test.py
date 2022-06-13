@@ -3,7 +3,8 @@ import unittest
 
 from django.conf import settings
 
-from .entities import Category
+from domain.category.entities import Category
+
 from .dto import CategoryOutput, CategoryOutputMapper
 
 

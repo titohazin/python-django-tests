@@ -3,7 +3,7 @@ from datetime import datetime
 
 from django.conf import settings
 
-from category.validator import CategoryValidator, CategoryValidatorFactory
+from .validators import CategoryValidator
 
 
 class CategoryValidatorUnitTest(unittest.TestCase):
@@ -15,12 +15,11 @@ class CategoryValidatorUnitTest(unittest.TestCase):
         if not settings.configured:
             settings.configure(USE_I18N=False)
 
-        self.validator = CategoryValidatorFactory.instance()
+        self.validator = CategoryValidator()
         return super().setUp()
 
     def test_if_factory_instances_a_category_validator(self):
-        self.assertIsInstance(
-            CategoryValidatorFactory.instance(), CategoryValidator)
+        self.assertIsInstance(CategoryValidator(), CategoryValidator)
 
     def test_if_invalidate_when_pass_no_dict_parameter(self):
         test_data = [[], 'foobar', False, 9]
