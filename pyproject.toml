@@ -31,7 +31,7 @@ dev = [
 flake8 = "flake8 --max-line-length=100 ./video_library/" # Using FLAKE8 instead of PYLINT
 pep8 = "autopep8 --in-place --recursive"
 test = "pytest --ignore ./__pypackages__"
-test-cov = "pdm run test --cov ./video_library/ --cov-fail-under=80"
+test-cov = "pdm run test --cov ./video_library --cov-fail-under=80"
 test-cov-report = "pdm run test-cov --cov-report html:./.htmlcov"
 
 [build-system]

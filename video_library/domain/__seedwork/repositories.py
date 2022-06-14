@@ -1,5 +1,5 @@
-from abc import ABC
-import abc
+from abc import ABC, abstractmethod
+import asyncio
 import copy
 from dataclasses import dataclass, field
 import math
@@ -18,28 +18,52 @@ class RepositoryInterface(Generic[T, Input, Output], ABC):
 
     sortable_fields: List[str] = []
 
-    @abc.abstractmethod
+    @abstractmethod
     def insert(self, entity: T) -> None:
         ...
 
-    @abc.abstractmethod
+    @abstractmethod
+    async def insert_async(self, entity: T) -> None:
+        ...
+
+    @abstractmethod
     def update(self, entity: T) -> None:
         ...
 
-    @abc.abstractmethod
+    @abstractmethod
+    async def update_async(self, entity: T) -> None:
+        ...
+
+    @abstractmethod
     def delete(self, id_: str | UniqueEntityId) -> None:
         ...
 
-    @abc.abstractmethod
+    @abstractmethod
+    async def delete_async(self, id_: str | UniqueEntityId) -> None:
+        ...
+
+    @abstractmethod
     def find_by_id(self, id_: str | UniqueEntityId) -> T:
         ...
 
-    @abc.abstractmethod
+    @abstractmethod
+    async def find_by_id_async(self, id_: str | UniqueEntityId) -> T:
+        ...
+
+    @abstractmethod
     def find_all(self) -> List[T]:
         ...
 
-    @abc.abstractmethod
+    @abstractmethod
+    async def find_all_async(self) -> List[T]:
+        ...
+
+    @abstractmethod
     def search(self, input_: Input) -> Output:
+        ...
+
+    @abstractmethod
+    async def search_async(self, input_: Input) -> Output:
         ...
 
 
@@ -138,6 +162,8 @@ class InMemoryRepository(
         ],
         ABC):
 
+    TEST_ASYNC_DELAY = 0.001
+
     _items: List[T] = field(default_factory=lambda: [])
 
     def insert(self, entity: T) -> None:
@@ -148,16 +174,28 @@ class InMemoryRepository(
             raise EntityAlreadyExistsException(
                 f'Entity already exists using ID: {entity.id}')
 
+    async def insert_async(self, entity: T) -> None:
+        await asyncio.sleep(self.TEST_ASYNC_DELAY)
+        self.insert(entity)
+
     def update(self, entity: T) -> None:
         found = self.find_by_id(entity.id)
         found_index = self._items.index(found)
         self._items[found_index] = copy.copy(entity)
+
+    async def update_async(self, entity: T) -> None:
+        await asyncio.sleep(self.TEST_ASYNC_DELAY)
+        self.update(entity)
 
     def delete(self, id_: str | UniqueEntityId) -> None:
         found = self.find_by_id(id_)
         found_index = self._items.index(found)
         found.deactivate()
         self._items[found_index] = copy.copy(found)
+
+    async def delete_async(self, id_: str | UniqueEntityId) -> None:
+        await asyncio.sleep(self.TEST_ASYNC_DELAY)
+        self.delete(id_)
 
     def find_by_id(self, id_: str | UniqueEntityId) -> T:
         entity = next(filter(lambda e: e.id == str(id_), self._items), None)
@@ -167,8 +205,16 @@ class InMemoryRepository(
         else:
             return copy.copy(entity)
 
+    async def find_by_id_async(self, id_: str | UniqueEntityId) -> T:
+        await asyncio.sleep(self.TEST_ASYNC_DELAY)
+        return self.find_by_id(id_)
+
     def find_all(self) -> List[T]:
         return copy.copy(list(filter(lambda e: e.is_active, self._items)))
+
+    async def find_all_async(self) -> List[T]:
+        await asyncio.sleep(self.TEST_ASYNC_DELAY)
+        return self.find_all()
 
     def search(self, input_: SearchParams[Filter]) -> SearchResult[T, Filter]:
 
@@ -188,8 +234,12 @@ class InMemoryRepository(
             filter_=input_.filter_
         )
 
-    @abc.abstractmethod
-    def _apply_filter(self, items: List[T], filter: Filter | None) -> List[T]:
+    async def search_async(self, input_: SearchParams[Filter]) -> SearchResult[T, Filter]:
+        await asyncio.sleep(self.TEST_ASYNC_DELAY)
+        return self.search(input_)
+
+    @abstractmethod
+    def _apply_filter(self, items: List[T], filter_: Filter | None) -> List[T]:
         ...
 
     def _apply_sort(

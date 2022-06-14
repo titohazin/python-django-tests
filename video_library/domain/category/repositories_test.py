@@ -10,10 +10,9 @@ class CategoryRepositoryUnitTests(unittest.TestCase):
     def test_if_implements_searchable_repository_interface(self):
         with self.assertRaises(TypeError) as assert_error:
             CategoryRepository()
-        self.assertEqual(
-            assert_error.exception.args[0],
-            "Can't instantiate abstract class CategoryRepository with " +  # noqa: W504
-            "abstract methods delete, find_all, find_by_id, insert, search, update")
+        self.assertTrue(
+            "Can't instantiate abstract class CategoryRepository with "
+            in assert_error.exception.args[0])
 
     def test_if_search_params_implements_default_search_params(self):
         search_params = CategoryRepository.SearchParams()

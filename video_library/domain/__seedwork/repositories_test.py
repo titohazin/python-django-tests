@@ -28,7 +28,9 @@ class RepositoryInterfaceUnitTests(unittest.TestCase):
         self.assertEqual(
             assert_error.exception.args[0],
             "Can't instantiate abstract class RepositoryInterface " +  # noqa: W504
-            "with abstract methods delete, find_all, find_by_id, insert, search, update")
+            "with abstract methods delete, delete_async, find_all, " +  # noqa: W504
+            "find_all_async, find_by_id, find_by_id_async, insert, " +  # noqa: W504
+            "insert_async, search, search_async, update, update_async")
 
     def test_sortable_fields_props(self):
         self.assertEqual(RepositoryInterface.sortable_fields, [])
@@ -660,3 +662,56 @@ class InMemoryRepositoryUnitTests(unittest.TestCase):
                 filter_='_1'
             )
         )
+
+
+class InMemoryRepositoryUnitAsyncTests(unittest.IsolatedAsyncioTestCase):
+
+    async def test_insert_async_method(self):
+        async_repo = InMemoryRepositoryStub()
+        entity = EntityStub()
+        await async_repo.insert_async(entity)
+        self.assertEqual(len(async_repo._items), 1)
+        self.assertEqual(async_repo._items[0], entity)
+
+    async def test_update_async_method(self):
+        async_repo = InMemoryRepositoryStub()
+        entity = EntityStub()
+        await async_repo.insert_async(entity)
+        entity.update('bar')
+        self.assertNotEqual(async_repo._items[0], entity)
+        await async_repo.update_async(entity)
+        self.assertEqual(len(async_repo._items), 1)
+        self.assertEqual(async_repo._items[0], entity)
+
+    async def test_delete_async_method(self):
+        async_repo = InMemoryRepositoryStub()
+        entity = EntityStub()
+        await async_repo.insert_async(entity)
+        self.assertEqual(len(async_repo._items), 1)
+        self.assertTrue(async_repo._items[0].is_active)
+        await async_repo.delete_async(entity.id)
+        self.assertEqual(len(async_repo._items), 1)
+        self.assertFalse(async_repo._items[0].is_active)
+
+    async def test_find_by_id_async_method(self):
+        async_repo = InMemoryRepositoryStub()
+        entity = EntityStub()
+        await async_repo.insert_async(entity)
+        found = await async_repo.find_by_id_async(entity.id)
+        self.assertEqual(entity, found)
+
+    async def test_find_all_async_method(self):
+        async_repo = InMemoryRepositoryStub()
+        entity = EntityStub()
+        await async_repo.insert_async(entity)
+        found = await async_repo.find_all_async()
+        self.assertEqual([entity], found)
+
+    async def test_search_async_method(self):
+        async_repo = InMemoryRepositoryStub()
+        entity_test = EntityStub(foo='foobar')
+        await async_repo.insert_async(entity_test)
+        await async_repo.insert_async(EntityStub())
+        result = await async_repo.search_async(SearchParams(
+            page=1, per_page=3, filter_='foobar'))
+        self.assertEqual([entity_test], result.items)

@@ -10,7 +10,7 @@ from domain.category.entities import Category
 from .repositories import CategoryInMemoryRepository
 
 
-class CategorySearchableInMemoryRepositoryUnitTests(unittest.TestCase):
+class CategoryInMemoryRepositoryUnitTests(unittest.TestCase):
 
     repo: CategoryInMemoryRepository
 
