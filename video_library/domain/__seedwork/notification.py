@@ -1,15 +1,18 @@
+from dataclasses import dataclass, field
 from typing import List, overload
 
 
+@dataclass(slots=True)
 class Notification:
 
-    __messages: dict[str, List[str]] = {}
-    __temp: List[str] = []
+    __messages: dict[str, List[str]] = field(default_factory=lambda: {})
+    __temp: List[str] = field(default_factory=lambda: [])
 
     def add_message(self, context: str, message: str) -> None:
         if context not in self.__messages:
             self.__messages[context] = []
-        self.__messages[context].append(message)
+        if message not in self.__messages[context]:
+            self.__messages[context].append(message)
         self.__temp = self.__messages[context]
 
     def remove_message(self, context: str, message: str) -> None:

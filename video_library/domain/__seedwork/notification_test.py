@@ -1,8 +1,18 @@
 import unittest
+from dataclasses import is_dataclass
+
 from .notification import Notification
 
 
-class NotificationsUnitTests(unittest.TestCase):
+class NotificationUnitTests(unittest.TestCase):
+
+    def test_if_is_a_data_class(self):
+        self.assertTrue(is_dataclass(Notification))
+
+    def test_init_properties(self):
+        notification = Notification()
+        self.assertEqual(notification._Notification__messages, {})
+        self.assertEqual(notification._Notification__temp, [])
 
     def test_notification_add_messages(self):
         notification = Notification()
@@ -11,6 +21,8 @@ class NotificationsUnitTests(unittest.TestCase):
             self.assertTrue(
                 "'context' and 'message'" in assert_error.exception.args[0])
         self.assertEqual(notification.messages, {})
+        notification.add_message('info', 'foo')
+        notification.add_message('info', 'foo')
         notification.add_message('info', 'foo')
         notification.add_message('info', 'bar')
         notification.add_message('warning', 'foobar')
