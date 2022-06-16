@@ -7,7 +7,7 @@ from domain.category.entities import Category
 
 @dataclass(slots=True, frozen=True)
 class CategoryOutput:
-    id_: str
+    id: str
     name: str
     description: str
     is_active: bool
@@ -33,7 +33,7 @@ class CategoryOutputMapper:
 
     def to_output(self, category: Category) -> CategoryOutput:
         return self.__child(
-            id_=category.id,
+            id=category.id,
             name=category.name,
             description=category.description,
             is_active=category.is_active,

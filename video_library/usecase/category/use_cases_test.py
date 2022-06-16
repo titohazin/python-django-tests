@@ -83,7 +83,7 @@ class CreateCategoryUseCaseUnitTests(unittest.TestCase):
         self.assertEqual(
             output_,
             CreateCategoryUseCase.Output(
-                id_=category.id,
+                id=category.id,
                 name=category.name,
                 description=category.description,
                 is_active=category.is_active,
@@ -139,7 +139,7 @@ class GetCategoryUseCaseUnitTests(unittest.TestCase):
         self.assertEqual(
             output_,
             GetCategoryUseCase.Output(
-                id_=category.id,
+                id=category.id,
                 name=category.name,
                 description=category.description,
                 is_active=category.is_active,
@@ -298,7 +298,7 @@ class UpdateCategoryUseCaseUnitTests(unittest.TestCase):
         self.assertEqual(
             output_,
             UpdateCategoryUseCase.Output(
-                id_=category.id,
+                id=category.id,
                 name=category.name,
                 description=category.description,
                 is_active=category.is_active,

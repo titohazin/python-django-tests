@@ -14,7 +14,7 @@ class CategoryOutputUnitTests(unittest.TestCase):
         self.assertEqual(
             CategoryOutput.__annotations__,
             {
-                'id_': str,
+                'id': str,
                 'name': str,
                 'description': str,
                 'is_active': bool,
@@ -58,7 +58,7 @@ class CategoryOutputMapperUnitTests(unittest.TestCase):
         self.assertEqual(
             CategoryOutputMapper.from_default_child().to_output(new_category),
             CategoryOutput(
-                id_=new_category.id,
+                id=new_category.id,
                 name=new_category.name,
                 description=new_category.description,
                 is_active=new_category.is_active,
