@@ -6,9 +6,7 @@ authors = [
     {name = "titohazin", email = "titohazin@gmail.com"},
 ]
 dependencies = [
-    "django==3.2.13",
-    "autopep8>=1.6.0",
-    "flake8>=4.0.1",
+    "django>=4.0.5",
     "djangorestframework>=3.13.1"]
 requires-python = ">=3.10.4"
 license = {text = "MIT"}
@@ -23,15 +21,20 @@ verify_ssl = true
 
 [tool.pdm.dev-dependencies]
 dev = [
+    "autopep8>=1.6.0",
+    "flake8>=4.0.1",
     "pytest>=7.1.2",
     "pytest-cov>=3.0.0",
 ]
 
 [tool.pdm.scripts]
-flake8 = "flake8 --max-line-length=100 ./video_library/" # Using FLAKE8 instead of PYLINT
+manage = "python ./src/django_boot/manage.py"
+server = "pdm run manage runserver 0.0.0.0:8000"
+migrate = "pdm run manage migrate"
+flake8 = "flake8 --max-line-length=100 ./src/core" # Using FLAKE8 instead of PYLINT
 pep8 = "autopep8 --in-place --recursive"
 test = "pytest --ignore ./__pypackages__"
-test-cov = "pdm run test --cov ./video_library --cov-fail-under=80"
+test-cov = "pdm run test --cov ./src/core --cov-fail-under=80"
 test-cov-report = "pdm run test-cov --cov-report html:./.htmlcov"
 
 [build-system]

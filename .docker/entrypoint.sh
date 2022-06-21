@@ -2,7 +2,7 @@
 
 # PDM initialization
 pdm install
-eval "$(pdm --pep582)"
+# eval "$(pdm --pep582)"
 
 # Alias creation
 echo 'alias manage="python manage.py"' >> ~/.zshrc

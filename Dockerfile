@@ -8,7 +8,7 @@ RUN apt install -y --no-install-recommends default-jre
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
 # Python Package Manager
-RUN pip install pdm>=1.15.2
+RUN pip install pdm>=1.15.3
 
 # Add non-root user
 RUN useradd -ms /bin/bash python
@@ -37,7 +37,7 @@ ENV PATH="/home/python/app/__pypackages__/3.10/bin:${PATH}"
 RUN echo 'eval "$(pdm --pep582)"' >> ~/.bashrc
 RUN echo 'eval "$(pdm --pep582)"' >> ~/.zshrc
 
-ENV PYTHONPATH=${PYTHONPATH}/home/python/app
+ENV PYTHONPATH=${PYTHONPATH}/home/python/app/src
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONFAULTHANDLER=1
